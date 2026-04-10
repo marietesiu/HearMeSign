@@ -1,0 +1,2654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>SignFuture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation-duration: 0.25s;
+    animation-timing-function: cubic-bezier(0.19, 1, 0.22, 1);
+  }
+
+:root{
+  --bg:#070b12;--surface:#0d1422;--border:rgba(255,255,255,.15);
+  --teal:#00f5ce;--amber:#ffb83f;--violet:#c4aaff;--rose:#ff7aaa;
+  --nav-h:72px;--fs:16px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none;}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--bg);color:#fff;font-family:'DM Sans',sans-serif;font-size:var(--fs);-webkit-font-smoothing:antialiased;cursor:none;}
+textarea,input[type=text]{user-select:text!important;-webkit-user-select:text!important;}
+.sel{user-select:text!important;-webkit-user-select:text!important;}
+#cur{position:fixed;top:0;left:0;pointer-events:none;z-index:9999;width:10px;height:10px;background:#fff;border-radius:50%;transform:translate(-50%,-50%);mix-blend-mode:difference;transition:width .15s,height .15s;}
+#curR{position:fixed;top:0;left:0;pointer-events:none;z-index:9998;width:32px;height:32px;border:1px solid rgba(255,255,255,.3);border-radius:50%;transform:translate(-50%,-50%);transition:width .3s,height .3s,opacity .3s;opacity:.4;}
+.orbs{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);animation:orbf linear infinite;}
+.o1{width:600px;height:600px;background:#00ddb8;opacity:.07;top:-250px;left:-200px;animation-duration:26s;}
+.o2{width:500px;height:500px;background:#f5a623;opacity:.06;bottom:-200px;right:-150px;animation-duration:32s;animation-delay:-12s;}
+.o3{width:300px;height:300px;background:#a78bfa;opacity:.07;top:40%;left:55%;animation-duration:20s;animation-delay:-6s;}
+@keyframes orbf{0%{transform:translate(0,0)}33%{transform:translate(40px,-30px)}66%{transform:translate(-20px,40px)}100%{transform:translate(0,0)}}
+body::before{content:'';position:fixed;inset:0;z-index:1;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");opacity:.025;}
+#app{position:relative;z-index:2;width:100%;height:100%;display:flex;flex-direction:column;}
+.views{flex:1;overflow:hidden;position:relative;}
+.view{position:absolute;inset:0;overflow-y:auto;padding-bottom:calc(var(--nav-h)+ 20px);transform:translateX(100%);opacity:0;transition:transform .38s cubic-bezier(.4,0,.2,1),opacity .3s ease;pointer-events:none;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
+.view::-webkit-scrollbar{width:4px;}
+.view::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+.view.active{transform:translateX(0);opacity:1;pointer-events:all;}
+.view.exit-left{transform:translateX(-40px);opacity:0;pointer-events:none;}
+.bottom-nav{position:relative;z-index:100;height:var(--nav-h);background:rgba(7,11,18,.93);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;align-items:center;padding:0 4px;gap:2px;flex-shrink:0;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px 2px;border-radius:14px;border:none;background:transparent;cursor:pointer;transition:background .2s;position:relative;}
+.nav-item:active{background:rgba(255,255,255,.04);}
+.nav-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;transition:background .25s,transform .25s,box-shadow .25s;}
+.nav-item.active .nav-icon{transform:translateY(-2px) scale(1.08);}
+.nav-item[data-view="home"].active .nav-icon,.nav-item[data-view="s2a"].active .nav-icon{background:rgba(0,245,206,.15);box-shadow:0 4px 16px rgba(0,245,206,.25);}
+.nav-item[data-view="a2s"].active .nav-icon{background:rgba(255,184,63,.15);box-shadow:0 4px 16px rgba(255,184,63,.25);}
+.nav-item[data-view="t2s"].active .nav-icon{background:rgba(196,170,255,.15);box-shadow:0 4px 16px rgba(196,170,255,.25);}
+.nav-item[data-view="s2t"].active .nav-icon{background:rgba(255,122,170,.15);box-shadow:0 4px 16px rgba(255,122,170,.25);}
+.nav-item[data-view="settings"].active .nav-icon{background:rgba(255,255,255,.12);box-shadow:0 4px 16px rgba(255,255,255,.1);}
+.nav-item[data-view="feedback"].active .nav-icon{background:rgba(196,170,255,.15);box-shadow:0 4px 16px rgba(196,170,255,.25);}
+.nav-item[data-view="feedback"].active .nav-pip{background:var(--violet);}
+.nav-item[data-view="learn"].active .nav-icon{background:rgba(255,200,80,.15);box-shadow:0 4px 16px rgba(255,200,80,.25);}
+.nav-label{font-size:9px;font-weight:700;color:rgba(255,255,255,.5);transition:color .25s;white-space:nowrap;}
+.nav-item.active .nav-label{color:#fff;}
+.nav-pip{position:absolute;bottom:2px;width:4px;height:4px;border-radius:2px;background:transparent;transition:background .25s;}
+.nav-item[data-view="home"].active .nav-pip,.nav-item[data-view="s2a"].active .nav-pip{background:var(--teal);}
+.nav-item[data-view="a2s"].active .nav-pip{background:var(--amber);}
+.nav-item[data-view="t2s"].active .nav-pip{background:var(--violet);}
+.nav-item[data-view="s2t"].active .nav-pip{background:var(--rose);}
+.nav-item[data-view="settings"].active .nav-pip{background:#fff;}
+.nav-item[data-view="learn"].active .nav-pip{background:#ffc850;}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 8px;position:sticky;top:0;z-index:10;background:linear-gradient(to bottom,var(--bg) 65%,transparent);}
+.back-btn{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.14);border:2px solid rgba(255,255,255,.3);border-radius:16px;padding:13px 22px 13px 16px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:17px;font-weight:700;color:#fff;transition:background .2s,border-color .2s,transform .15s;}
+.back-btn:hover{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.55);transform:translateX(-2px);}
+.back-btn:active{transform:scale(.96);}
+.page-badge{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:6px 14px;border-radius:100px;border:2px solid;}
+.badge-teal{color:#fff;border-color:rgba(0,245,206,.7);background:rgba(0,245,206,.18);}
+.badge-amber{color:#fff;border-color:rgba(255,184,63,.7);background:rgba(255,184,63,.18);}
+.badge-violet{color:#fff;border-color:rgba(196,170,255,.7);background:rgba(196,170,255,.18);}
+.badge-rose{color:#fff;border-color:rgba(255,122,170,.7);background:rgba(255,122,170,.18);}
+.badge-white{color:#fff;border-color:rgba(255,255,255,.45);background:rgba(255,255,255,.08);}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:7px;background:rgba(0,245,206,.09);border:1px solid rgba(0,245,206,.25);border-radius:100px;padding:5px 14px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#fff;font-weight:700;margin-bottom:18px;}
+.eyebrow-dot{width:5px;height:5px;border-radius:50%;background:var(--teal);animation:pdot 2s infinite;}
+@keyframes pdot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.6)}}
+.hero-title{font-family:'Syne',sans-serif;font-size:clamp(40px,11vw,68px);font-weight:800;line-height:1.0;letter-spacing:-.025em;margin-bottom:12px;}
+.hero-sub{font-size:16px;color:rgba(255,255,255,.9);font-weight:500;max-width:300px;margin:0 auto;line-height:1.6;}
+.home-divider{height:1px;margin:16px 20px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent);}
+.tool-cards{padding:0 16px;display:flex;flex-direction:column;gap:10px;}
+.tool-card{background:var(--surface);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:16px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:transform .22s,border-color .22s,box-shadow .22s;position:relative;overflow:hidden;}
+.tool-card::after{content:'';position:absolute;inset:0;opacity:0;background:linear-gradient(135deg,rgba(255,255,255,.05),transparent);transition:opacity .2s;pointer-events:none;}
+.tool-card:hover{transform:translateY(-2px);}.tool-card:hover::after{opacity:1;}.tool-card:active{transform:scale(.98);}
+.tool-card.c-teal:hover{border-color:rgba(0,245,206,.4);box-shadow:0 6px 30px rgba(0,245,206,.12);}
+.tool-card.c-amber:hover{border-color:rgba(255,184,63,.4);box-shadow:0 6px 30px rgba(255,184,63,.12);}
+.tool-card.c-violet:hover{border-color:rgba(196,170,255,.4);box-shadow:0 6px 30px rgba(196,170,255,.12);}
+.tool-card.c-rose:hover{border-color:rgba(255,122,170,.4);box-shadow:0 6px 30px rgba(255,122,170,.12);}
+.card-icon{width:52px;height:52px;border-radius:13px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:24px;border:1px solid;}
+.card-icon.c-teal{background:rgba(0,245,206,.12);border-color:rgba(0,245,206,.35);}
+.card-icon.c-amber{background:rgba(255,184,63,.12);border-color:rgba(255,184,63,.35);}
+.card-icon.c-violet{background:rgba(196,170,255,.12);border-color:rgba(196,170,255,.35);}
+.card-icon.c-rose{background:rgba(255,122,170,.12);border-color:rgba(255,122,170,.35);}
+.card-body{flex:1;min-width:0;}
+.card-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:#fff;margin-bottom:4px;}
+.card-desc{font-size:13px;color:rgba(255,255,255,.78);font-weight:500;line-height:1.4;}
+.card-chevron{font-size:22px;color:rgba(255,255,255,.55);transition:transform .2s,color .2s;flex-shrink:0;}
+.tool-card:hover .card-chevron{transform:translateX(3px);}
+.tool-card.c-teal:hover .card-chevron{color:var(--teal);}
+.tool-card.c-amber:hover .card-chevron{color:var(--amber);}
+.tool-card.c-violet:hover .card-chevron{color:var(--violet);}
+.tool-card.c-rose:hover .card-chevron{color:var(--rose);}
+.home-settings-btn{width:100%;display:flex;align-items:center;gap:16px;background:linear-gradient(135deg,rgba(196,170,255,.14),rgba(196,170,255,.06));border:2px solid rgba(196,170,255,.4);border-radius:18px;padding:20px 22px;cursor:pointer;transition:background .2s,border-color .2s,transform .15s;box-shadow:0 4px 24px rgba(196,170,255,.08);}
+.home-settings-btn:hover{background:linear-gradient(135deg,rgba(196,170,255,.24),rgba(196,170,255,.12));border-color:rgba(196,170,255,.7);transform:translateY(-2px);}
+.home-settings-btn:active{transform:scale(.98);}
+.tool-header{padding:22px 20px 14px;}
+.tool-title{font-family:'Syne',sans-serif;font-size:clamp(28px,7vw,44px);font-weight:800;line-height:1.05;letter-spacing:-.02em;margin-bottom:8px;}
+.tool-sub{font-size:15px;color:rgba(255,255,255,.85);font-weight:500;}
+.panel{margin:0 16px 12px;background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden;}
+.panel-label{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#fff;padding:12px 16px 8px;border-bottom:1px solid var(--border);}
+.camera-panel{position:relative;}
+.camera-panel video{width:100%;aspect-ratio:16/9;display:block;object-fit:cover;background:#000;}
+.rec-pill{position:absolute;top:10px;left:10px;background:rgba(220,30,30,.9);backdrop-filter:blur(8px);color:#fff;font-size:10px;font-weight:700;letter-spacing:.12em;padding:4px 10px;border-radius:100px;display:none;align-items:center;gap:5px;}
+.rec-pill.on{display:flex;}
+.rec-dot{width:5px;height:5px;border-radius:50%;background:#fff;animation:pdot 1s infinite;}
+.wave-panel{padding:20px 16px 16px;display:flex;flex-direction:column;align-items:center;gap:12px;}
+.waveform{display:flex;align-items:flex-end;gap:4px;height:52px;padding:4px 10px;background:rgba(255,255,255,.03);border-radius:10px;width:100%;}
+.wbar{flex:1;max-width:12px;border-radius:3px 3px 1px 1px;background:var(--amber);height:4px;transition:height .07s ease,background .1s ease;}
+.wave-status{font-size:14px;font-weight:600;color:rgba(255,255,255,.6);}
+.wave-status.on{color:var(--amber);}
+.output-panel{padding:14px 16px;min-height:80px;}
+.output-text{font-size:var(--fs);color:#fff;line-height:1.7;font-weight:400;word-break:break-word;}
+.output-text.ph{color:rgba(255,255,255,.4);font-style:italic;}
+.clear-btn-sm{font-size:13px;font-weight:700;color:#fff;background:none;border:none;cursor:pointer;transition:color .2s;font-family:'DM Sans',sans-serif;}
+.clear-btn-sm:hover{color:var(--rose);}
+textarea.tool-input{width:100%;min-height:110px;background:transparent;border:none;outline:none;resize:none;font-family:'DM Sans',sans-serif;font-size:var(--fs);color:#fff;padding:10px 16px 10px;line-height:1.65;}
+textarea.tool-input::placeholder{color:rgba(255,255,255,.38);}
+.textarea-footer{display:flex;justify-content:flex-end;padding:0 16px 10px;}
+.char-c{font-size:12px;color:rgba(255,255,255,.55);font-weight:600;}
+.status-strip{margin:0 16px 12px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:13px 18px;font-size:15px;font-weight:600;color:#fff;min-height:46px;display:flex;align-items:flex-start;line-height:1.5;word-break:break-word;}
+.audio-result-panel{padding:0 16px 12px;display:none;}
+.audio-result-panel.show{display:block;}
+.audio-lbl{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#fff;margin-bottom:8px;}
+audio.result{width:100%;border-radius:8px;}
+.btn-stack{padding:0 16px 20px;display:flex;flex-direction:column;gap:8px;}
+.btn{width:100%;padding:16px;border-radius:13px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;border:none;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .18s,box-shadow .18s,opacity .18s;}
+.btn:active{transform:scale(.97);}
+.btn:disabled{opacity:.35;cursor:not-allowed;transform:none!important;box-shadow:none!important;}
+.btn-teal{background:linear-gradient(135deg,#00f5ce,#00c0a0);color:#021a14;box-shadow:0 4px 20px rgba(0,245,206,.25);}
+.btn-amber{background:linear-gradient(135deg,#ffb83f,#d4901a);color:#160d00;box-shadow:0 4px 20px rgba(255,184,63,.25);}
+.btn-violet{background:linear-gradient(135deg,#c4aaff,#8c69ee);color:#fff;box-shadow:0 4px 20px rgba(196,170,255,.25);}
+.btn-rose{background:linear-gradient(135deg,#ff7aaa,#d4346a);color:#fff;box-shadow:0 4px 20px rgba(255,122,170,.25);}
+.btn-teal:not(:disabled):hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,245,206,.38);}
+.btn-amber:not(:disabled):hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(255,184,63,.38);}
+.btn-violet:not(:disabled):hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(196,170,255,.38);}
+.btn-rose:not(:disabled):hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(255,122,170,.38);}
+.btn-stop{background:rgba(230,50,50,.18);color:#fff;border:2px solid rgba(230,50,50,.5);}
+.btn-stop:not(:disabled):hover{background:rgba(230,50,50,.3);}
+/* Clip queue progress dots */
+.clip-dots{display:flex;gap:6px;justify-content:center;padding:8px 0 4px;flex-wrap:wrap;}
+.clip-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.2);transition:background .2s;}
+.clip-dot.playing{background:var(--teal);}
+.clip-dot.done{background:rgba(0,245,206,.4);}
+/* ── SETTINGS ── */
+.settings-section{margin:0 16px 20px;}
+.settings-section-title{font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.48);margin-bottom:10px;padding:0 4px;}
+.settings-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden;}
+.setting-row{display:flex;align-items:center;padding:18px 20px;gap:16px;border-bottom:1px solid rgba(255,255,255,.07);}
+.setting-row:last-child{border-bottom:none;}
+.setting-row.clickable{cursor:pointer;transition:background .2s;}
+.setting-row.clickable:hover{background:rgba(255,255,255,.04);}
+.setting-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.si-teal{background:rgba(0,245,206,.12);border:1px solid rgba(0,245,206,.28);}
+.si-amber{background:rgba(255,184,63,.12);border:1px solid rgba(255,184,63,.28);}
+.si-violet{background:rgba(196,170,255,.12);border:1px solid rgba(196,170,255,.28);}
+.si-rose{background:rgba(255,122,170,.12);border:1px solid rgba(255,122,170,.28);}
+.si-white{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);}
+.setting-info{flex:1;min-width:0;}
+.setting-label{font-size:16px;font-weight:700;color:#fff;margin-bottom:3px;}
+.setting-desc{font-size:13px;color:rgba(255,255,255,.6);font-weight:500;line-height:1.4;}
+.setting-control{flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:6px;min-width:130px;}
+.sf-range{-webkit-appearance:none;appearance:none;width:130px;height:8px;border-radius:4px;outline:none;cursor:pointer;border:none;background:rgba(255,255,255,.14);}
+.sf-range::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:50%;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.5);cursor:pointer;border:3px solid var(--teal);}
+#vol-slider::-webkit-slider-thumb{border-color:var(--amber);}
+#mic-slider::-webkit-slider-thumb{border-color:var(--violet);}
+.range-val{font-size:14px;font-weight:700;color:#fff;}
+.fs-preview{margin:0 16px 18px;background:rgba(0,245,206,.06);border:1px solid rgba(0,245,206,.2);border-radius:14px;padding:16px 20px;}
+.fs-preview-label{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);margin-bottom:8px;opacity:.85;}
+.fs-preview-text{color:#fff;font-weight:500;line-height:1.6;}
+/* LANG TOGGLE */
+.lang-toggle{display:flex;gap:6px;}
+.lang-btn{padding:8px 16px;border-radius:10px;border:2px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:rgba(255,255,255,.7);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:background .2s,border-color .2s,color .2s;}
+.lang-btn.active{background:rgba(0,245,206,.18);border-color:rgba(0,245,206,.6);color:#fff;}
+.lang-btn:hover:not(.active){background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.4);}
+/* CREDITS */
+.credits-person{font-size:14px;color:var(--violet);font-weight:600;margin-top:2px;}
+/* MIC TEST */
+.mic-test-box{background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden;margin:0 16px 20px;}
+.mic-test-header{padding:18px 20px 14px;border-bottom:1px solid rgba(255,255,255,.07);}
+.mic-test-title{font-size:17px;font-weight:700;color:#fff;margin-bottom:6px;}
+.mic-test-desc{font-size:13px;color:rgba(255,255,255,.62);font-weight:500;line-height:1.5;}
+.mic-test-body{padding:18px 20px;}
+.mic-meter-wrap{background:rgba(255,255,255,.04);border-radius:12px;padding:14px 16px;margin-bottom:14px;}
+.mic-meter-label{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:10px;}
+.mic-level-bar-track{width:100%;height:18px;background:rgba(255,255,255,.08);border-radius:9px;overflow:hidden;margin-bottom:8px;}
+.mic-level-bar-fill{height:100%;width:0%;border-radius:9px;transition:width .07s ease,background .1s ease;background:var(--teal);}
+.mic-db-row{display:flex;justify-content:space-between;align-items:center;}
+.mic-db-val{font-size:15px;font-weight:700;color:#fff;}
+.mic-db-hint{font-size:12px;color:rgba(255,255,255,.5);font-weight:500;}
+.mic-speech-box{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:12px;padding:14px 16px;min-height:70px;margin-bottom:14px;}
+.mic-speech-label{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:8px;}
+.mic-speech-text{font-size:16px;color:#fff;font-weight:500;line-height:1.55;min-height:28px;}
+.mic-speech-text.ph{color:rgba(255,255,255,.32);font-style:italic;}
+.mic-test-btns{display:flex;gap:10px;}
+.mic-test-btns .btn{flex:1;}
+.mic-status{font-size:13px;font-weight:600;color:rgba(255,255,255,.55);margin-top:10px;min-height:20px;text-align:center;line-height:1.45;}
+.mic-status.active{color:var(--violet);}
+/* ERROR MODAL */
+.modal-backdrop{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);display:flex;align-items:flex-end;justify-content:center;padding:0 0 calc(var(--nav-h)+ 16px);opacity:0;pointer-events:none;transition:opacity .28s ease;}
+.modal-backdrop.show{opacity:1;pointer-events:all;}
+.modal-sheet{background:#0f1827;border:1px solid rgba(255,255,255,.14);border-radius:24px 24px 20px 20px;padding:28px 24px 24px;width:100%;max-width:480px;transform:translateY(32px);transition:transform .32s cubic-bezier(.22,1,.36,1);box-shadow:0 -4px 40px rgba(0,0,0,.5);}
+.modal-backdrop.show .modal-sheet{transform:translateY(0);}
+.modal-icon{font-size:40px;text-align:center;margin-bottom:14px;}
+.modal-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#fff;text-align:center;margin-bottom:8px;}
+.modal-msg{font-size:14px;color:rgba(255,255,255,.7);font-weight:500;line-height:1.6;text-align:center;margin-bottom:22px;}
+.modal-btns{display:flex;flex-direction:column;gap:10px;}
+.modal-btn-retry{width:100%;padding:16px;border-radius:13px;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:700;cursor:pointer;border:none;background:linear-gradient(135deg,#c4aaff,#8c69ee);color:#fff;box-shadow:0 4px 20px rgba(196,170,255,.3);transition:transform .18s,box-shadow .18s;}
+.modal-btn-retry:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(196,170,255,.45);}
+.modal-btn-dismiss{width:100%;padding:14px;border-radius:13px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;border:2px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:rgba(255,255,255,.75);transition:background .2s,border-color .2s;}
+.modal-btn-dismiss:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.4);}
+
+/* ═══════════════════════════ DEV PANEL ═══════════════════════════ */
+.dev-fab{position:fixed;bottom:calc(var(--nav-h)+ 14px);left:14px;z-index:300;
+  width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,.25);
+  background:rgba(15,24,39,.85);backdrop-filter:blur(12px);
+  display:flex;align-items:center;justify-content:center;font-size:20px;
+  cursor:pointer;transition:transform .2s,background .2s,box-shadow .2s;
+  box-shadow:0 2px 12px rgba(0,0,0,.5);}
+.dev-fab:hover{transform:scale(1.12);background:rgba(30,45,70,.95);box-shadow:0 4px 24px rgba(196,170,255,.3);}
+.dev-panel{position:fixed;inset:0;z-index:400;display:flex;flex-direction:column;
+  background:var(--bg);transform:translateX(-100%);transition:transform .35s cubic-bezier(.4,0,.2,1);
+  overflow:hidden;}
+.dev-panel.open{transform:translateX(0);}
+.dev-topbar{display:flex;align-items:center;justify-content:space-between;
+  padding:16px 18px;border-bottom:1px solid var(--border);flex-shrink:0;
+  background:rgba(13,20,34,.95);backdrop-filter:blur(12px);}
+.dev-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;
+  color:#fff;display:flex;align-items:center;gap:10px;}
+.dev-close{width:36px;height:36px;border-radius:50%;border:1px solid var(--border);
+  background:rgba(255,255,255,.06);cursor:pointer;font-size:20px;color:#fff;
+  display:flex;align-items:center;justify-content:center;transition:background .2s;}
+.dev-close:hover{background:rgba(255,255,255,.14);}
+.dev-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;background:rgba(13,20,34,.8);}
+.dev-tab{flex:1;padding:13px 4px;text-align:center;font-size:13px;font-weight:700;
+  color:rgba(255,255,255,.5);cursor:pointer;border-bottom:2px solid transparent;
+  transition:color .2s,border-color .2s;}
+.dev-tab.active{color:#fff;border-color:var(--violet);}
+.dev-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;}
+.dev-body::-webkit-scrollbar{width:4px;}
+.dev-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+/* Diagnostic */
+.diag-row{display:flex;align-items:center;gap:12px;background:var(--surface);
+  border:1px solid var(--border);border-radius:14px;padding:14px 16px;}
+.diag-icon{font-size:22px;flex-shrink:0;width:32px;text-align:center;}
+.diag-label{font-size:14px;font-weight:700;color:#fff;flex:1;}
+.diag-detail{font-size:12px;color:rgba(255,255,255,.55);margin-top:2px;font-weight:500;}
+.diag-badge{font-size:11px;font-weight:700;padding:4px 12px;border-radius:100px;
+  border:1px solid;flex-shrink:0;white-space:nowrap;}
+.diag-ok{color:#00e5a0;border-color:rgba(0,229,160,.4);background:rgba(0,229,160,.1);}
+.diag-fail{color:#ff7aaa;border-color:rgba(255,122,170,.4);background:rgba(255,122,170,.1);}
+.diag-warn{color:#ffb83f;border-color:rgba(255,184,63,.4);background:rgba(255,184,63,.1);}
+.diag-run{color:#c4aaff;border-color:rgba(196,170,255,.4);background:rgba(196,170,255,.1);}
+.diag-skip{color:rgba(255,255,255,.4);border-color:rgba(255,255,255,.15);background:rgba(255,255,255,.04);}
+/* Training */
+.sign-grid{display:flex;flex-wrap:wrap;gap:8px;}
+.sign-pill{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:100px;
+  border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);
+  font-size:13px;font-weight:700;color:#fff;cursor:default;}
+.sign-pill.has-data{border-color:rgba(0,245,206,.45);background:rgba(0,245,206,.08);color:var(--teal);}
+.sign-pill-count{font-size:11px;color:rgba(255,255,255,.5);font-weight:500;}
+.sign-pill.has-data .sign-pill-count{color:rgba(0,245,206,.7);}
+.del-btn{background:none;border:none;cursor:pointer;color:rgba(255,122,170,.7);
+  font-size:13px;padding:0 2px;line-height:1;transition:color .2s;}
+.del-btn:hover{color:var(--rose);}
+.rec-progress{height:8px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden;margin:6px 0;}
+.rec-progress-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--teal),var(--violet));width:0%;transition:width .15s;}
+.train-progress-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;}
+.train-bar-track{height:10px;border-radius:5px;background:rgba(255,255,255,.08);overflow:hidden;margin:10px 0;}
+.train-bar-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--violet),var(--teal));width:0%;transition:width .4s;}
+.train-msg{font-size:13px;font-weight:600;color:rgba(255,255,255,.75);min-height:18px;}
+.dev-input{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);
+  border-radius:10px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:15px;
+  color:#fff;outline:none;transition:border-color .2s;}
+.dev-input:focus{border-color:rgba(196,170,255,.6);}
+.dev-input::placeholder{color:rgba(255,255,255,.35);}
+.dev-section-label{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:rgba(255,255,255,.45);margin-bottom:6px;}
+.dev-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;}
+
+
+/* ── Language / model status ── */
+.lang-model-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;
+  border-radius:100px;font-size:11px;font-weight:700;letter-spacing:.08em;
+  border:1px solid;transition:background .3s,border-color .3s,color .3s;}
+.lmp-asl{background:rgba(0,245,206,.12);border-color:rgba(0,245,206,.4);color:var(--teal);}
+.lmp-lse{background:rgba(255,184,63,.12);border-color:rgba(255,184,63,.4);color:var(--amber);}
+.lmp-dot{width:5px;height:5px;border-radius:50%;animation:pdot 2s infinite;}
+.lmp-dot-asl{background:var(--teal);}
+.lmp-dot-lse{background:var(--amber);}
+.model-status-row{display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.06);}
+.model-status-label{font-size:14px;font-weight:700;color:#fff;}
+.model-status-sub{font-size:12px;color:rgba(255,255,255,.55);margin-top:2px;font-weight:500;}
+.model-badge{font-size:11px;font-weight:700;padding:5px 14px;border-radius:100px;
+  border:1px solid;white-space:nowrap;}
+.mb-ready{color:#00e5a0;border-color:rgba(0,229,160,.4);background:rgba(0,229,160,.1);}
+.mb-missing{color:#ff7aaa;border-color:rgba(255,122,170,.4);background:rgba(255,122,170,.1);}
+.mb-active{color:#fff;border-color:rgba(196,170,255,.6);background:rgba(196,170,255,.18);}
+/* ── Dev sub-tabs (ASL / LSE inside Train tab) ── */
+.dev-subtabs{display:flex;gap:6px;margin-bottom:12px;}
+.dev-subtab{flex:1;padding:10px 4px;text-align:center;font-size:13px;font-weight:700;
+  color:rgba(255,255,255,.5);cursor:pointer;border-radius:10px;
+  border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);
+  transition:background .2s,border-color .2s,color .2s;}
+.dev-subtab.active-asl{background:rgba(0,245,206,.14);border-color:rgba(0,245,206,.4);color:var(--teal);}
+.dev-subtab.active-lse{background:rgba(255,184,63,.14);border-color:rgba(255,184,63,.4);color:var(--amber);}
+/* ── Switch-language loading overlay ── */
+.lang-switching{position:fixed;inset:0;z-index:600;
+  background:rgba(7,11,18,.82);backdrop-filter:blur(8px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:14px;opacity:0;pointer-events:none;transition:opacity .25s;}
+.lang-switching.show{opacity:1;pointer-events:all;}
+.lang-switching-spinner{width:44px;height:44px;border-radius:50%;
+  border:3px solid rgba(255,255,255,.15);border-top-color:#fff;
+  animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.lang-switching-msg{font-size:15px;font-weight:700;color:#fff;}
+
+@keyframes fup{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── LEARN VIEW ─────────────────────────────────────────────────────────────── */
+.learn-word-grid{display:flex;flex-wrap:wrap;gap:8px;padding:0 16px 4px;}
+.learn-word-btn{padding:10px 18px;border-radius:12px;border:2px solid rgba(255,200,80,.3);
+  background:rgba(255,200,80,.08);color:#ffc850;font-family:'DM Sans',sans-serif;
+  font-size:14px;font-weight:700;cursor:pointer;transition:background .2s,border-color .2s,transform .15s;}
+.learn-word-btn:hover{background:rgba(255,200,80,.18);border-color:rgba(255,200,80,.6);}
+.learn-word-btn.selected{background:rgba(255,200,80,.28);border-color:#ffc850;color:#fff;}
+.learn-step{margin:0 16px 12px;background:var(--surface);border:1px solid var(--border);
+  border-radius:18px;overflow:hidden;display:none;}
+.learn-step.active{display:block;}
+.learn-step-header{padding:12px 16px 8px;border-bottom:1px solid var(--border);
+  font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#ffc850;}
+.learn-attempt-ring{width:80px;height:80px;border-radius:50%;border:4px solid rgba(255,255,255,.12);
+  display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 8px;
+  transition:border-color .4s;}
+.learn-attempt-ring.pass{border-color:#00f5ce;}
+.learn-attempt-ring.fail{border-color:#ff7aaa;}
+.learn-conf-bar-track{height:10px;background:rgba(255,255,255,.1);border-radius:5px;margin:0 16px 6px;overflow:hidden;}
+.learn-conf-bar-fill{height:100%;border-radius:5px;width:0%;transition:width .5s ease,background .4s;}
+.learn-attempt-count{font-size:12px;color:rgba(255,255,255,.45);text-align:center;padding-bottom:8px;}
+
+/* ── S2T FEEDBACK BUTTON + MODAL ──────────────────────────────────────────── */
+.s2t-fb-btn{
+  position:fixed;bottom:calc(var(--nav-h) + 72px);right:16px;z-index:250;
+  display:none;align-items:center;gap:8px;
+  background:linear-gradient(135deg,#c4aaff,#8c69ee);
+  color:#fff;border:none;border-radius:100px;
+  padding:12px 20px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;
+  cursor:pointer;box-shadow:0 4px 20px rgba(196,170,255,.4);
+  transition:transform .18s,box-shadow .18s;animation:fup .3s ease;}
+.s2t-fb-btn.show{display:flex;}
+.s2t-fb-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(196,170,255,.5);}
+.s2t-fb-btn:active{transform:scale(.97);}
+
+.fb-modal-backdrop{position:fixed;inset:0;z-index:510;
+  background:rgba(0,0,0,.7);backdrop-filter:blur(6px);
+  display:flex;align-items:flex-end;justify-content:center;
+  padding:0 0 calc(var(--nav-h) + 16px);
+  opacity:0;pointer-events:none;transition:opacity .28s ease;}
+.fb-modal-backdrop.show{opacity:1;pointer-events:all;}
+.fb-modal-sheet{background:#0f1827;border:1px solid rgba(255,255,255,.14);
+  border-radius:24px 24px 20px 20px;padding:24px 20px 20px;
+  width:100%;max-width:480px;
+  transform:translateY(32px);transition:transform .32s cubic-bezier(.22,1,.36,1);
+  box-shadow:0 -4px 40px rgba(0,0,0,.5);}
+.fb-modal-backdrop.show .fb-modal-sheet{transform:translateY(0);}
+.fb-modal-title{font-size:13px;font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:8px;}
+.fb-modal-pred{font-size:28px;font-weight:700;color:var(--violet);
+  text-transform:capitalize;margin-bottom:4px;}
+.fb-modal-conf{font-size:13px;color:rgba(255,255,255,.4);margin-bottom:18px;}
+.fb-modal-q{font-size:16px;font-weight:600;color:#fff;margin-bottom:14px;}
+.fb-yes-btn{width:100%;padding:15px;border-radius:13px;border:none;
+  background:rgba(74,222,128,.15);border:1px solid rgba(74,222,128,.4);
+  color:#4ade80;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;
+  cursor:pointer;transition:background .15s;margin-bottom:8px;}
+.fb-yes-btn:hover{background:rgba(74,222,128,.25);}
+.fb-no-btn{width:100%;padding:15px;border-radius:13px;border:none;
+  background:rgba(255,122,170,.1);border:1px solid rgba(255,122,170,.3);
+  color:var(--rose);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;
+  cursor:pointer;transition:background .15s;margin-bottom:8px;}
+.fb-no-btn:hover{background:rgba(255,122,170,.2);}
+.fb-cancel-btn{width:100%;padding:12px;border-radius:13px;
+  border:1px solid rgba(255,255,255,.12);background:transparent;
+  color:rgba(255,255,255,.4);font-family:'DM Sans',sans-serif;font-size:14px;
+  font-weight:600;cursor:pointer;transition:background .15s;}
+.fb-cancel-btn:hover{background:rgba(255,255,255,.06);}
+.fb-correction-label{font-size:11px;font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:10px;margin-top:4px;}
+.fb-correction-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;
+  max-height:200px;overflow-y:auto;margin-bottom:10px;}
+.fb-correction-btn{padding:10px 6px;background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.1);border-radius:8px;
+  color:rgba(255,255,255,.8);font-size:12px;font-weight:600;
+  cursor:pointer;text-align:center;text-transform:capitalize;
+  transition:background .15s,border-color .15s;}
+.fb-correction-btn:hover{background:rgba(255,122,170,.15);
+  border-color:rgba(255,122,170,.4);color:#fff;}
+.fb-done-msg{text-align:center;padding:8px 0 4px;
+  font-size:15px;font-weight:600;color:rgba(255,255,255,.7);}
+.fb-training-note{font-size:12px;color:rgba(255,255,255,.35);
+  text-align:center;margin-top:6px;}
+</style>
+</head>
+<body>
+<div id="cur"></div><div id="curR"></div>
+<div class="orbs"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div></div>
+<div id="app">
+  <div class="views">
+
+    <!-- HOME -->
+    <div class="view active" id="view-home">
+      <div style="padding:40px 20px 16px;text-align:center;">
+        <div class="hero-eyebrow"><span class="eyebrow-dot"></span> Real-time translation</div>
+        <div class="hero-title"><span style="color:var(--teal)">Sign</span><br>to the<br><span style="color:var(--amber)">Fu</span><span style="color:var(--violet)">tu</span><span style="color:var(--rose)">re</span></div>
+        <p class="hero-sub" style="margin-top:14px;">Choose a translation mode to get started.</p>
+      </div>
+      <div class="home-divider"></div>
+      <div class="tool-cards">
+        <div class="tool-card c-teal" onclick="nav('s2a')"><div class="card-icon c-teal">🤟</div><div class="card-body"><div class="card-title">Sign → Audio</div><div class="card-desc">Record signing, receive spoken audio</div></div><span class="card-chevron">›</span></div>
+        <div class="tool-card c-amber" onclick="nav('a2s')"><div class="card-icon c-amber">🎙️</div><div class="card-body"><div class="card-title">Audio → Sign</div><div class="card-desc">Speak into mic, see sign language video</div></div><span class="card-chevron">›</span></div>
+        <div class="tool-card c-violet" onclick="nav('t2s')"><div class="card-icon c-violet">✍️</div><div class="card-body"><div class="card-title">Text → Sign</div><div class="card-desc">Type a message, watch it get signed</div></div><span class="card-chevron">›</span></div>
+        <div class="tool-card c-rose" onclick="nav('s2t')"><div class="card-icon c-rose">📝</div><div class="card-body"><div class="card-title">Sign → Text</div><div class="card-desc">Sign on camera, receive a transcription</div></div><span class="card-chevron">›</span></div>
+        <div class="tool-card" style="border-color:rgba(255,200,80,.2);background:var(--surface);" onclick="nav('learn')"><div class="card-icon" style="background:rgba(255,200,80,.12);border-color:rgba(255,200,80,.35);font-size:24px;">🎓</div><div class="card-body"><div class="card-title" style="color:#ffc850;">Learn to Sign</div><div class="card-desc">AI teaches you a word — step by step</div></div><span class="card-chevron" style="color:rgba(255,200,80,.6);">›</span></div>
+        <div class="tool-card" style="border-color:rgba(196,170,255,.2);background:var(--surface);" onclick="nav('feedback');fbViewInit()">
+  <div class="card-icon" style="background:rgba(196,170,255,.12);border-color:rgba(196,170,255,.35);font-size:24px;">✦</div>
+  <div class="card-body"><div class="card-title" style="color:var(--violet);">AI Feedback</div><div class="card-desc">Correct predictions to improve the model</div></div>
+  <span class="card-chevron" style="color:rgba(196,170,255,.6);">›</span>
+</div>
+      </div>
+      <div style="padding:14px 16px 6px;">
+        <button class="home-settings-btn" onclick="nav('settings')">
+          <div style="width:52px;height:52px;border-radius:14px;background:rgba(196,170,255,.18);border:1px solid rgba(196,170,255,.38);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;">⚙️</div>
+          <div style="flex:1;text-align:left;"><div style="font-size:18px;font-weight:700;color:#fff;margin-bottom:3px;">Settings</div><div style="font-size:13px;color:rgba(255,255,255,.72);font-weight:500;">Language · Font size · Volume · Mic test</div></div>
+          <span style="font-size:24px;color:var(--violet);">›</span>
+        </button>
+      </div>
+      <p style="padding:0 20px 10px;text-align:center;font-size:12px;color:rgba(255,255,255,.38);">Use the tab bar below to switch tools instantly</p>
+    </div>
+
+    <!-- SIGN → AUDIO -->
+    <div class="view" id="view-s2a">
+      <div class="topbar"><button class="back-btn" onclick="nav('home')">← Home</button><span class="page-badge badge-teal">S → A</span></div>
+      <div class="tool-header"><div class="tool-title"><span style="color:var(--teal)">Sign</span> to Audio</div><div class="tool-sub">Record your signing — hear the words spoken back.</div></div>
+      <div class="panel camera-panel">
+        <div class="panel-label">Camera</div>
+        <video id="s2a-vid" autoplay muted playsinline></video>
+        <div class="rec-pill" id="s2a-rec"><span class="rec-dot"></span> REC</div>
+      </div>
+      <div class="audio-result-panel" id="s2a-audio">
+        <div class="panel" style="padding:14px 16px;">
+          <div class="audio-lbl">▶ Translated Audio</div>
+          <audio class="result" id="s2a-player" controls></audio>
+        </div>
+      </div>
+      <div class="status-strip" id="s2a-status">Press Start to begin.</div>
+      <div class="btn-stack">
+        <button class="btn btn-teal" id="s2a-start" onclick="s2aStart()">▶ Start Recording</button>
+        <button class="btn btn-stop" id="s2a-stop" onclick="s2aStop()" disabled>⏹ Stop &amp; Send</button>
+      </div>
+    </div>
+
+    <!-- AUDIO → SIGN -->
+    <div class="view" id="view-a2s">
+      <div class="topbar"><button class="back-btn" onclick="nav('home')">← Home</button><span class="page-badge badge-amber">A → S</span></div>
+      <div class="tool-header"><div class="tool-title"><span style="color:var(--amber)">Audio</span> to Sign</div><div class="tool-sub">Speak — the browser recognises your words and shows the sign.</div></div>
+      <div class="panel">
+        <div class="panel-label">Microphone</div>
+        <div class="wave-panel">
+          <div class="waveform" id="a2s-waveform">
+            <div class="wbar" id="wb1"></div><div class="wbar" id="wb2"></div><div class="wbar" id="wb3"></div>
+            <div class="wbar" id="wb4"></div><div class="wbar" id="wb5"></div><div class="wbar" id="wb6"></div>
+            <div class="wbar" id="wb7"></div><div class="wbar" id="wb8"></div><div class="wbar" id="wb9"></div>
+            <div class="wbar" id="wb10"></div><div class="wbar" id="wb11"></div><div class="wbar" id="wb12"></div>
+          </div>
+          <div class="wave-status" id="a2s-wave-lbl">Microphone inactive</div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-label">Heard</div>
+        <div style="padding:12px 16px 10px;font-size:15px;color:rgba(255,255,255,.7);min-height:44px;" id="a2s-heard-txt">—</div>
+      </div>
+      <div class="panel">
+        <div class="panel-label">Sign Language Output</div>
+        <div style="aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:#000;">
+          <span style="color:rgba(255,255,255,.4);font-size:13px;" id="a2s-ph">Video will appear here</span>
+          <video id="a2s-result" playsinline style="display:none;width:100%;height:100%;object-fit:contain;position:absolute;inset:0;"></video>
+        </div>
+        <div class="clip-dots" id="a2s-dots"></div>
+      </div>
+      <div class="status-strip" id="a2s-status">Press Start — speak clearly in English.</div>
+      <div class="btn-stack">
+        <button class="btn btn-amber" id="a2s-start" onclick="a2sStart()">▶ Start Listening</button>
+        <button class="btn btn-stop" id="a2s-stop" onclick="a2sStop()" disabled>⏹ Stop</button>
+      </div>
+    </div>
+
+    <!-- TEXT → SIGN -->
+    <div class="view" id="view-t2s">
+      <div class="topbar"><button class="back-btn" onclick="nav('home')">← Home</button><span class="page-badge badge-violet">T → S</span></div>
+      <div class="tool-header"><div class="tool-title"><span style="color:var(--violet)">Text</span> to Sign</div><div class="tool-sub">Type anything — watch it get signed.</div></div>
+      <div class="panel" style="border-color:rgba(196,170,255,.22);">
+        <div class="panel-label">Your message</div>
+        <textarea class="tool-input" id="t2s-input" aria-label="Text to convert to sign language" placeholder="Type something here… e.g. hello, thank you, how are you" oninput="document.getElementById('t2s-cc').textContent=this.value.length"></textarea>
+        <div class="textarea-footer"><span class="char-c" id="t2s-cc">0</span>&nbsp;chars</div>
+      </div>
+      <div class="panel" style="border-color:rgba(196,170,255,.22);">
+        <div class="panel-label">Sign Language Output</div>
+        <div style="aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:#000;">
+          <span style="color:rgba(255,255,255,.4);font-size:13px;" id="t2s-ph">Video will appear here</span>
+          <video id="t2s-result" playsinline style="display:none;width:100%;height:100%;object-fit:contain;position:absolute;inset:0;"></video>
+        </div>
+        <div class="clip-dots" id="t2s-dots"></div>
+      </div>
+      <div class="status-strip" id="t2s-status">Enter text and press Convert.</div>
+      <div class="btn-stack"><button class="btn btn-violet" id="t2s-send" onclick="t2sSend()">✨ Convert to Sign Language</button></div>
+    </div>
+
+    <!-- SIGN → TEXT -->
+    <div class="view" id="view-s2t">
+      <div class="topbar"><button class="back-btn" onclick="nav('home')">← Home</button><span class="page-badge badge-rose">S → T</span></div>
+      <div class="tool-header"><div class="tool-title"><span style="color:var(--rose)">Sign</span> to Text</div><div class="tool-sub">Sign on camera — receive a written transcription.</div></div>
+      <div class="panel camera-panel">
+        <div class="panel-label">Camera</div>
+        <video id="s2t-vid" autoplay muted playsinline></video>
+        <div class="rec-pill" id="s2t-rec"><span class="rec-dot"></span> REC</div>
+      </div>
+      <div class="panel" style="border-color:rgba(255,122,170,.22);">
+        <div class="panel-label" style="display:flex;justify-content:space-between;align-items:center;padding-right:16px;">
+          <span style="font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;">Transcription</span>
+          <button class="clear-btn-sm" onclick="s2tClear()">Clear ✕</button>
+        </div>
+        <div class="output-panel"><div class="output-text ph sel" id="s2t-out">Your transcription will appear here…</div></div>
+      </div>
+      <div class="status-strip" id="s2t-status">Press Start to begin.</div>
+      <div class="btn-stack">
+        <button class="btn btn-rose" id="s2t-start" onclick="s2tStart()">▶ Start Recording</button>
+        <button class="btn btn-stop" id="s2t-stop" onclick="s2tStop()" disabled>⏹ Stop &amp; Send</button>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="view" id="view-settings">
+      <div class="topbar"><button class="back-btn" onclick="nav('home')">← Home</button><span class="page-badge badge-white">⚙️ Settings</span></div>
+      <div class="tool-header"><div class="tool-title">Settings</div><div class="tool-sub">Personalise the app to suit your needs.</div></div>
+      <div class="fs-preview">
+        <div class="fs-preview-label">Text size preview</div>
+        <div class="fs-preview-text" id="fs-preview-text">The quick brown fox jumps over the lazy dog. Record signing, receive audio.</div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-section-title">Display</div>
+        <div class="settings-card">
+          <div class="setting-row">
+            <div class="setting-icon si-teal">🌐</div>
+            <div class="setting-info">
+              <div class="setting-label">Language &amp; AI Model</div>
+              <div class="setting-desc">Switches translation language and loads the matching AI model on the server</div>
+              <div style="margin-top:8px;" id="settings-model-status">
+                <span class="lang-model-pill lmp-asl" id="active-lang-pill">
+                  <span class="lmp-dot lmp-dot-asl"></span>
+                  <span id="active-lang-text">ASL — English</span>
+                </span>
+              </div>
+            </div>
+            <div class="setting-control">
+              <div class="lang-toggle">
+                <button class="lang-btn active" id="lang-en" onclick="switchLang('asl')">🇺🇸 ASL</button>
+                <button class="lang-btn" id="lang-es" onclick="switchLang('lse')">🇪🇸 LSE</button>
+              </div>
+            </div>
+          </div>
+          <div class="setting-row">
+            <div class="setting-icon si-teal">🔤</div>
+            <div class="setting-info"><div class="setting-label">Font Size</div><div class="setting-desc">Makes all text bigger or smaller</div></div>
+            <div class="setting-control"><input type="range" class="sf-range" id="fs-slider" aria-label="Font size" min="12" max="26" value="16" step="1" oninput="applyFontSize(this.value)"><div class="range-val" id="fs-val">16 px</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-section-title">Audio</div>
+        <div class="settings-card">
+          <div class="setting-row">
+            <div class="setting-icon si-amber">🔊</div>
+            <div class="setting-info"><div class="setting-label">Playback Volume</div><div class="setting-desc">How loud the translated audio plays</div></div>
+            <div class="setting-control"><input type="range" class="sf-range" id="vol-slider" aria-label="Playback volume" min="0" max="100" value="80" step="5" oninput="applyVolume(this.value)"><div class="range-val" id="vol-val">80%</div></div>
+          </div>
+          <div class="setting-row">
+            <div class="setting-icon si-violet">🎚️</div>
+            <div class="setting-info"><div class="setting-label">Mic Sensitivity</div><div class="setting-desc">How strongly the waveform reacts</div></div>
+            <div class="setting-control"><input type="range" class="sf-range" id="mic-slider" aria-label="Microphone sensitivity" min="1" max="10" value="5" step="1" oninput="applyMicSensitivity(this.value)"><div class="range-val" id="mic-val">5 / 10</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="settings-section"><div class="settings-section-title">🎙️ Microphone Test</div></div>
+      <div class="mic-test-box">
+        <div class="mic-test-header"><div class="mic-test-title">Test Your Microphone</div><div class="mic-test-desc">Press <strong style="color:#fff;">Start Test</strong>, speak normally and watch the level bar. Adjust Mic Sensitivity until the bar reaches the middle at normal speaking volume.</div></div>
+        <div class="mic-test-body">
+          <div class="mic-meter-wrap">
+            <div class="mic-meter-label">📶 Input Level</div>
+            <div class="mic-level-bar-track"><div class="mic-level-bar-fill" id="mic-bar-fill"></div></div>
+            <div class="mic-db-row"><div class="mic-db-val" id="mic-db-val">—</div><div class="mic-db-hint" id="mic-db-hint">Start the test to see levels</div></div>
+          </div>
+          <div class="mic-meter-wrap">
+            <div class="mic-meter-label">〰️ Waveform</div>
+            <div class="waveform" id="test-waveform">
+              <div class="wbar" id="twb1"></div><div class="wbar" id="twb2"></div><div class="wbar" id="twb3"></div>
+              <div class="wbar" id="twb4"></div><div class="wbar" id="twb5"></div><div class="wbar" id="twb6"></div>
+              <div class="wbar" id="twb7"></div><div class="wbar" id="twb8"></div><div class="wbar" id="twb9"></div>
+              <div class="wbar" id="twb10"></div><div class="wbar" id="twb11"></div><div class="wbar" id="twb12"></div>
+            </div>
+          </div>
+          <div class="mic-speech-box">
+            <div class="mic-speech-label">💬 What I hear you saying</div>
+            <div class="mic-speech-text ph" id="mic-speech-out">Your words will appear here as you speak…</div>
+          </div>
+          <div class="mic-test-btns">
+            <button class="btn btn-violet" id="mic-test-start" onclick="micTestStart()">🎙️ Start Test</button>
+            <button class="btn btn-stop" id="mic-test-stop" onclick="micTestStop()" disabled>⏹ Stop</button>
+          </div>
+          <div class="mic-status" id="mic-test-status">Ready — press Start Test to begin</div>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-section-title">About</div>
+        <div class="settings-card">
+          <div class="setting-row"><div class="setting-icon si-white">ℹ️</div><div class="setting-info"><div class="setting-label">SignFuture</div><div class="setting-desc">Real-time sign language translation · v1.0</div></div></div>
+          <div class="setting-row"><div class="setting-icon si-white">🔄</div><div class="setting-info"><div class="setting-label">Reset to Defaults</div><div class="setting-desc">Restore all settings to original values</div></div><div class="setting-control"><button class="btn btn-stop" style="width:auto;padding:11px 20px;font-size:14px;" onclick="resetSettings()">Reset</button></div></div>
+          <div class="setting-row clickable" onclick="nav('credits')"><div class="setting-icon si-rose">🌟</div><div class="setting-info"><div class="setting-label">Credits</div><div class="setting-desc">The team and tech behind SignFuture</div></div><span style="font-size:22px;color:var(--rose);flex-shrink:0;">›</span></div>
+        </div>
+      </div>
+      <div style="height:16px;"></div>
+    </div>
+
+    <!-- CREDITS -->
+    <div class="view" id="view-credits">
+      <div class="topbar"><button class="back-btn" onclick="nav('settings')">← Settings</button><span class="page-badge badge-rose">🌟 Credits</span></div>
+      <div style="text-align:center;padding:36px 24px 20px;">
+        <div style="font-family:'Syne',sans-serif;font-size:clamp(34px,10vw,56px);font-weight:800;letter-spacing:-.02em;margin-bottom:10px;"><span style="color:var(--teal)">Sign</span><span style="color:var(--violet)">Future</span></div>
+        <p style="font-size:15px;color:rgba(255,255,255,.65);font-weight:500;line-height:1.65;">Built to make communication accessible for everyone, one sign at a time.</p>
+      </div>
+      <div style="margin:0 16px 20px;">
+        <div style="font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:10px;padding:0 4px;">👥 The Team</div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden;">
+          <div style="padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:16px;"><div style="width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);">📋</div><div><div style="font-size:16px;font-weight:700;color:#fff;margin-bottom:3px;">Project Manager</div><div class="credits-person">Iván Villena</div></div></div>
+          <div style="padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:16px;"><div style="width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);">👩‍💻</div><div><div style="font-size:16px;font-weight:700;color:#fff;margin-bottom:3px;">Lead Developer</div><div class="credits-person">Mario Caballero</div></div></div>
+          <div style="padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:16px;"><div style="width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);">🎨</div><div><div style="font-size:16px;font-weight:700;color:#fff;margin-bottom:3px;">UX Designer</div><div class="credits-person">Mateo Almenar</div></div></div>
+          <div style="padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:16px;"><div style="width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);">🔬</div><div><div style="font-size:16px;font-weight:700;color:#fff;margin-bottom:3px;">Impact Researcher</div><div class="credits-person">Samuel Gustas</div></div></div>
+          <div style="padding:18px 20px;display:flex;align-items:center;gap:16px;"><div style="width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);">🤖</div><div><div style="font-size:16px;font-weight:700;color:#fff;margin-bottom:3px;">AI Specialist</div><div class="credits-person">Rohan Mahtani</div></div></div>
+        </div>
+      </div>
+      <div style="margin:0 16px 20px;">
+        <div style="font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:10px;padding:0 4px;">🛠️ Built With</div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden;">
+          <div style="padding:14px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.07);"><span style="font-size:15px;font-weight:600;color:#fff;">SpeechRecognition API</span><span style="font-size:11px;font-weight:700;padding:4px 12px;border-radius:100px;border:1px solid;color:var(--teal);border-color:rgba(0,245,206,.4);background:rgba(0,245,206,.08);">Browser</span></div>
+          <div style="padding:14px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.07);"><span style="font-size:15px;font-weight:600;color:#fff;">Web Audio API</span><span style="font-size:11px;font-weight:700;padding:4px 12px;border-radius:100px;border:1px solid;color:var(--amber);border-color:rgba(255,184,63,.4);background:rgba(255,184,63,.08);">Browser</span></div>
+          <div style="padding:14px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.07);"><span style="font-size:15px;font-weight:600;color:#fff;">Flask + Python</span><span style="font-size:11px;font-weight:700;padding:4px 12px;border-radius:100px;border:1px solid;color:var(--violet);border-color:rgba(196,170,255,.4);background:rgba(196,170,255,.08);">Backend</span></div>
+          <div style="padding:14px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.07);"><span style="font-size:15px;font-weight:600;color:#fff;">Syne &amp; DM Sans</span><span style="font-size:11px;font-weight:700;padding:4px 12px;border-radius:100px;border:1px solid;color:#fff;border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.05);">Google Fonts</span></div>
+          <div style="padding:14px 20px;display:flex;align-items:center;justify-content:space-between;"><span style="font-size:15px;font-weight:600;color:#fff;">Claude Sonnet 4.5 <span style="font-size:12px;color:rgba(255,255,255,.5);font-weight:500;">by Anthropic</span></span><span style="font-size:11px;font-weight:700;padding:4px 12px;border-radius:100px;border:1px solid;color:var(--violet);border-color:rgba(196,170,255,.4);background:rgba(196,170,255,.08);">AI</span></div>
+        </div>
+      </div>
+      <div style="height:20px;"></div>
+    </div>
+
+  
+    <!-- LEARN TO SIGN -->
+    <div class="view" id="view-learn">
+      <div class="topbar"><button class="back-btn" onclick="learnExit()">← Home</button><span class="page-badge" style="color:#ffc850;border-color:rgba(255,200,80,.6);background:rgba(255,200,80,.15);">🎓 Learn</span></div>
+      <div class="tool-header">
+        <div class="tool-title"><span style="color:#ffc850;">Learn</span> to Sign</div>
+        <div class="tool-sub">Pick a word — the AI will teach you how to sign it.</div>
+      </div>
+
+      <!-- Step 0: word picker -->
+      <div class="learn-step active" id="learn-step-pick">
+        <div class="learn-step-header">Choose a word to learn</div>
+        <div style="padding:14px 0 10px;">
+          <div class="learn-word-grid" id="learn-word-grid">
+            <div style="padding:0 16px;color:rgba(255,255,255,.4);font-size:13px;">Loading words…</div>
+          </div>
+        </div>
+        <div style="padding:0 16px 16px;">
+          <button class="btn" style="background:linear-gradient(135deg,#ffc850,#e09a20);color:#1a0f00;box-shadow:0 4px 20px rgba(255,200,80,.25);" id="learn-start-btn" onclick="learnStart()" disabled>▶ Start Learning</button>
+        </div>
+      </div>
+
+      <!-- Step 1: watch the sign -->
+      <div class="learn-step" id="learn-step-watch">
+        <div class="learn-step-header">Step 1 — Watch the sign</div>
+        <div style="aspect-ratio:16/9;position:relative;overflow:hidden;background:#000;">
+          <video id="learn-demo-vid" playsinline style="width:100%;height:100%;object-fit:contain;"></video>
+        </div>
+        <div style="padding:14px 16px 6px;font-size:15px;font-weight:700;color:#fff;text-align:center;" id="learn-watch-label">—</div>
+        <div style="padding:0 16px 16px;">
+          <button class="btn" style="background:linear-gradient(135deg,#ffc850,#e09a20);color:#1a0f00;" id="learn-watched-btn" onclick="learnGoRecord()" disabled>I watched it — let me try ▶</button>
+        </div>
+      </div>
+
+      <!-- Step 2: try it -->
+      <div class="learn-step" id="learn-step-try">
+        <div class="learn-step-header">Step 2 — Now you try</div>
+        <div class="panel camera-panel" style="margin:0;border-radius:0;border:none;">
+          <video id="learn-cam-vid" autoplay muted playsinline></video>
+          <div class="rec-pill" id="learn-rec-pill"><span class="rec-dot"></span> REC</div>
+        </div>
+        <div class="status-strip" style="margin:8px 16px;" id="learn-try-status">Press Start when ready.</div>
+        <div style="padding:0 16px 16px;display:flex;gap:8px;">
+          <button class="btn" style="background:linear-gradient(135deg,#ffc850,#e09a20);color:#1a0f00;flex:1;" id="learn-rec-start" onclick="learnRecStart()">▶ Start</button>
+          <button class="btn btn-stop" id="learn-rec-stop" onclick="learnRecStop()" disabled style="flex:1;">⏹ Stop &amp; Check</button>
+        </div>
+      </div>
+
+      <!-- Step 3: result -->
+      <div class="learn-step" id="learn-step-result">
+        <div class="learn-step-header">Result</div>
+        <div style="padding:20px 16px 8px;text-align:center;">
+          <div class="learn-attempt-ring" id="learn-result-ring">❓</div>
+          <div style="font-size:20px;font-weight:700;color:#fff;margin-bottom:4px;" id="learn-result-title">—</div>
+          <div style="font-size:14px;color:rgba(255,255,255,.6);" id="learn-result-sub">—</div>
+        </div>
+        <div class="learn-conf-bar-track"><div class="learn-conf-bar-fill" id="learn-conf-bar"></div></div>
+        <div style="font-size:12px;color:rgba(255,255,255,.45);text-align:center;padding-bottom:4px;" id="learn-conf-label">—</div>
+        <div class="learn-attempt-count" id="learn-attempt-count"></div>
+        <div style="padding:0 16px 16px;display:flex;gap:8px;" id="learn-result-btns">
+          <button class="btn btn-stop" style="flex:1;" id="learn-retry-btn" onclick="learnGoRecord()">↻ Try Again</button>
+          <button class="btn" style="background:linear-gradient(135deg,#ffc850,#e09a20);color:#1a0f00;flex:1;" id="learn-next-btn" onclick="learnPickNew()">Next word ▶</button>
+        </div>
+      </div>
+
+    </div>
+
+
+<!-- FEEDBACK VIEW -->
+<div class="view" id="view-feedback">
+  <div class="topbar"><button class="back-btn" onclick="nav('home')">← Home</button><span class="page-badge badge-violet">✦ Feedback</span></div>
+  <div class="tool-header"><div class="tool-title"><span style="color:var(--violet);">AI</span> Feedback</div><div class="tool-sub">Review the last prediction and help the model improve.</div></div>
+
+  <div id="fb-view-idle" style="margin:0 16px;">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:28px 22px;text-align:center;">
+      <div style="font-size:40px;margin-bottom:14px;">🤟</div>
+      <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#fff;margin-bottom:8px;">No prediction yet</div>
+      <div style="font-size:14px;color:rgba(255,255,255,.6);line-height:1.6;margin-bottom:20px;">Use <strong style="color:#fff;">Sign → Text</strong> first, then come back here to confirm or correct what the AI recognised.</div>
+      <button class="btn btn-rose" style="max-width:260px;margin:0 auto;" onclick="nav('s2t')">▶ Go to Sign → Text</button>
+    </div>
+  </div>
+
+  <div id="fb-view-ready" style="display:none;">
+    <div style="margin:0 16px 12px;background:var(--surface);border:1px solid rgba(196,170,255,.3);border-radius:18px;padding:20px 20px 16px;">
+      <div style="font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:6px;">Last prediction</div>
+      <div style="font-size:32px;font-weight:700;color:var(--violet);text-transform:capitalize;margin-bottom:4px;" id="fbv-pred">—</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.4);" id="fbv-conf"></div>
+    </div>
+    <div style="margin:0 16px 10px;font-size:16px;font-weight:600;color:#fff;">Was the AI correct?</div>
+    <div style="padding:0 16px;display:flex;flex-direction:column;gap:8px;" id="fbv-yn">
+      <button class="btn" style="background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.35);color:#4ade80;" onclick="fbViewYes()">✓ Yes — it was correct</button>
+      <button class="btn btn-stop" onclick="fbViewShowCorrection()">✗ No — show correction grid</button>
+    </div>
+    <div id="fbv-correction" style="display:none;padding:0 16px;">
+      <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:10px;">Select the correct sign</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;max-height:220px;overflow-y:auto;margin-bottom:10px;" id="fbv-grid"></div>
+      <button class="btn btn-stop" style="margin-bottom:8px;" onclick="fbViewHideCorrection()">← Back</button>
+    </div>
+    <div id="fbv-done" style="display:none;margin:0 16px;">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;text-align:center;">
+        <div style="font-size:22px;font-weight:700;color:#fff;margin-bottom:6px;" id="fbv-done-msg">—</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.5);" id="fbv-done-note"></div>
+      </div>
+      <div style="padding:12px 0 0;">
+        <button class="btn btn-rose" onclick="nav('s2t')">▶ Try another sign</button>
+      </div>
+    </div>
+  </div>
+  <div style="height:20px;"></div>
+</div>
+
+</div><!-- /views -->
+
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-view="home"     onclick="nav('home')"    ><span class="nav-icon">🏠</span><span class="nav-label">Home</span><span class="nav-pip"></span></button>
+    <button class="nav-item"        data-view="s2a"      onclick="nav('s2a')"     ><span class="nav-icon">🤟</span><span class="nav-label">Sign→Audio</span><span class="nav-pip"></span></button>
+    <button class="nav-item"        data-view="a2s"      onclick="nav('a2s')"     ><span class="nav-icon">🎙️</span><span class="nav-label">Audio→Sign</span><span class="nav-pip"></span></button>
+    <button class="nav-item"        data-view="t2s"      onclick="nav('t2s')"     ><span class="nav-icon">✍️</span><span class="nav-label">Text→Sign</span><span class="nav-pip"></span></button>
+    <button class="nav-item"        data-view="s2t"      onclick="nav('s2t')"     ><span class="nav-icon">📝</span><span class="nav-label">Sign→Text</span><span class="nav-pip"></span></button>
+    <button class="nav-item"        data-view="learn"    onclick="nav('learn');learnInit()"   ><span class="nav-icon">🎓</span><span class="nav-label">Learn</span><span class="nav-pip"></span></button>
+    <button class="nav-item" data-view="feedback" onclick="nav('feedback');fbViewInit()"><span class="nav-icon">✦</span><span class="nav-label">Feedback</span><span class="nav-pip"></span></button>
+    <button class="nav-item"        data-view="settings" onclick="nav('settings')"><span class="nav-icon">⚙️</span><span class="nav-label">Settings</span><span class="nav-pip"></span></button>
+  </nav>
+
+
+<!-- DEV FAB -->
+<button class="dev-fab" id="dev-fab" onclick="devOpen()" title="Dev Panel">🛠</button>
+
+<!-- DEV PANEL -->
+<div class="dev-panel" id="dev-panel">
+  <div class="dev-topbar">
+    <div class="dev-title">🛠 Dev Panel</div>
+    <button class="dev-close" onclick="devClose()">✕</button>
+  </div>
+  <div class="dev-tabs">
+    <div class="dev-tab active" id="dt-diag"  onclick="devTab('diag')">🔍 Diagnostics</div>
+    <div class="dev-tab"        id="dt-lang"  onclick="devTab('lang')">🌐 Language</div>
+    <div class="dev-tab"        id="dt-train" onclick="devTab('train')">🧠 Train</div>
+  </div>
+
+  <!-- DIAGNOSTICS TAB -->
+  <div class="dev-body" id="db-diag">
+    <div class="dev-section-label">Connection &amp; Server</div>
+    <div class="diag-row" id="dr-health">
+      <span class="diag-icon">🌐</span>
+      <div style="flex:1"><div class="diag-label">Server /health</div><div class="diag-detail" id="dd-health">—</div></div>
+      <span class="diag-badge diag-skip" id="db-health">—</span>
+    </div>
+    <div class="diag-row" id="dr-clip">
+      <span class="diag-icon">🎬</span>
+      <div style="flex:1"><div class="diag-label">Clip file delivery</div><div class="diag-detail" id="dd-clip">Tests that MP4 files reach the browser</div></div>
+      <span class="diag-badge diag-skip" id="db-clip">—</span>
+    </div>
+    <div class="dev-section-label" style="margin-top:4px;">Audio &amp; Video</div>
+    <div class="diag-row" id="dr-mic">
+      <span class="diag-icon">🎙️</span>
+      <div style="flex:1"><div class="diag-label">Microphone access</div><div class="diag-detail" id="dd-mic">Browser microphone permission</div></div>
+      <span class="diag-badge diag-skip" id="db-mic">—</span>
+    </div>
+    <div class="diag-row" id="dr-sr">
+      <span class="diag-icon">🗣️</span>
+      <div style="flex:1"><div class="diag-label">Speech recognition</div><div class="diag-detail" id="dd-sr">Browser Web Speech API support</div></div>
+      <span class="diag-badge diag-skip" id="db-sr">—</span>
+    </div>
+    <div class="diag-row" id="dr-cam">
+      <span class="diag-icon">📷</span>
+      <div style="flex:1"><div class="diag-label">Camera access</div><div class="diag-detail" id="dd-cam">Browser camera permission</div></div>
+      <span class="diag-badge diag-skip" id="db-cam">—</span>
+    </div>
+    <div class="diag-row" id="dr-a2s">
+      <span class="diag-icon">🔄</span>
+      <div style="flex:1"><div class="diag-label">Audio→Sign round-trip</div><div class="diag-detail" id="dd-a2s">Sends a known clip word → server → clip URLs back</div></div>
+      <span class="diag-badge diag-skip" id="db-a2s">—</span>
+    </div>
+    <div class="diag-row" id="dr-model-asl">
+      <span class="diag-icon">🇺🇸</span>
+      <div style="flex:1"><div class="diag-label">ASL model</div><div class="diag-detail" id="dd-model-asl">—</div></div>
+      <span class="diag-badge diag-skip" id="db-model-asl">—</span>
+    </div>
+    <div class="diag-row" id="dr-model-lse">
+      <span class="diag-icon">🇪🇸</span>
+      <div style="flex:1"><div class="diag-label">LSE model</div><div class="diag-detail" id="dd-model-lse">—</div></div>
+      <span class="diag-badge diag-skip" id="db-model-lse">—</span>
+    </div>
+    <button class="btn btn-violet" onclick="diagRunAll()" id="diag-run-btn" style="margin-top:4px;">▶ Run All Tests</button>
+    <div style="font-size:12px;color:rgba(255,255,255,.4);text-align:center;padding-bottom:4px;" id="diag-summary">Press "Run All Tests" to begin</div>
+  </div>
+
+  <!-- LANGUAGE TAB -->
+  <div class="dev-body" id="db-lang" style="display:none;">
+    <div class="dev-section-label">Active model</div>
+    <div class="dev-card" style="padding:0;overflow:hidden;">
+      <div class="model-status-row" id="lang-asl-row">
+        <div>
+          <div class="model-status-label">🇺🇸 ASL — English</div>
+          <div class="model-status-sub" id="lang-asl-sub">Checking…</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+          <span class="model-badge" id="lang-asl-badge">—</span>
+          <button class="btn btn-teal" id="lang-asl-btn"
+            onclick="switchLang('asl')"
+            style="padding:8px 18px;font-size:13px;width:auto;">
+            Activate ASL
+          </button>
+        </div>
+      </div>
+      <div class="model-status-row" id="lang-lse-row" style="border-bottom:none;">
+        <div>
+          <div class="model-status-label">🇪🇸 LSE — Spanish</div>
+          <div class="model-status-sub" id="lang-lse-sub">Checking…</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+          <span class="model-badge" id="lang-lse-badge">—</span>
+          <button class="btn btn-amber" id="lang-lse-btn"
+            onclick="switchLang('lse')"
+            style="padding:8px 18px;font-size:13px;width:auto;">
+            Activate LSE
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="dev-section-label" style="margin-top:4px;">Training data on server</div>
+    <div class="dev-card" style="padding:0;overflow:hidden;">
+      <div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.06);">
+        <div style="font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);margin-bottom:8px;">ASL Samples</div>
+        <div class="sign-grid" id="lang-asl-samples">
+          <span style="font-size:13px;color:rgba(255,255,255,.4);">Loading…</span>
+        </div>
+      </div>
+      <div style="padding:12px 16px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:8px;">LSE Samples</div>
+        <div class="sign-grid" id="lang-lse-samples">
+          <span style="font-size:13px;color:rgba(255,255,255,.4);">Loading…</span>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-violet" onclick="langTabRefresh()" style="margin-top:4px;">↻ Refresh Status</button>
+  </div>
+
+  <!-- TRAIN TAB -->
+  <div class="dev-body" id="db-train" style="display:none;">
+    <!-- Train language selector -->
+    <div class="dev-subtabs">
+      <div class="dev-subtab active-asl" id="tst-asl" onclick="setTrainLang('asl')">🇺🇸 Training ASL</div>
+      <div class="dev-subtab" id="tst-lse" onclick="setTrainLang('lse')">🇪🇸 Training LSE</div>
+    </div>
+    <div class="dev-card" style="padding:10px 14px;margin-bottom:0;">
+      <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.5);margin-bottom:4px;">Currently collecting for:</div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span class="lang-model-pill lmp-asl" id="train-lang-pill">
+          <span class="lmp-dot lmp-dot-asl"></span>
+          <span id="train-lang-text">ASL — English</span>
+        </span>
+        <span style="font-size:12px;color:rgba(255,255,255,.4);">Recordings are sent to this model</span>
+      </div>
+    </div>
+    <!-- Step 1: label -->
+    <div class="dev-card">
+      <div class="dev-section-label">Step 1 — Enter sign label</div>
+      <label for="train-label" class="sr-only">Sign label</label>
+      <input class="dev-input" id="train-label" aria-label="Sign label" placeholder='e.g. "hello" or "thank you"' style="margin-top:6px;">
+    </div>
+    <!-- Step 2: record -->
+    <div class="dev-card">
+      <div class="dev-section-label">Step 2 — Record samples (30 reps)</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.6);margin-bottom:10px;line-height:1.5;">
+        Click <strong style="color:#fff;">Start Recording</strong>, perform the sign clearly and repeatedly. Stop when the bar fills.
+      </div>
+      <div style="background:#000;border-radius:10px;overflow:hidden;aspect-ratio:16/9;position:relative;margin-bottom:10px;">
+        <video id="train-vid" autoplay muted playsinline style="width:100%;height:100%;object-fit:cover;"></video>
+        <div style="position:absolute;bottom:8px;left:8px;right:8px;">
+          <div class="rec-progress"><div class="rec-progress-fill" id="rec-fill"></div></div>
+          <div style="font-size:12px;font-weight:700;color:#fff;text-align:center;" id="rec-count">0 frames captured</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-teal" id="rec-start-btn" onclick="recStart()" style="flex:1;">▶ Start Recording</button>
+        <button class="btn btn-stop" id="rec-stop-btn" onclick="recStop()" disabled style="flex:1;">⏹ Stop</button>
+      </div>
+      <div class="diag-row" style="margin-top:10px;padding:10px 12px;" id="rec-status-row">
+        <span class="diag-icon">💾</span>
+        <div style="flex:1"><div class="diag-label" style="font-size:13px;" id="rec-status">Ready — enter label and start recording.</div></div>
+      </div>
+    </div>
+    <!-- Collected data -->
+    <div class="dev-card">
+      <div class="dev-section-label" style="margin-bottom:8px;">Collected data <button onclick="trainLoadSamples()" style="background:none;border:none;cursor:pointer;color:var(--violet);font-size:12px;font-weight:700;font-family:'DM Sans',sans-serif;">↻ refresh</button></div>
+      <div class="sign-grid" id="sample-grid">
+        <span style="font-size:13px;color:rgba(255,255,255,.4);">Loading…</span>
+      </div>
+    </div>
+    <!-- Step 3: train -->
+    <div class="dev-card">
+      <div class="dev-section-label">Step 3 — Train the model</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.6);margin-bottom:12px;line-height:1.5;">
+        Needs at least <strong style="color:#fff;">2 different signs</strong> collected above. Training takes ~10–30s on the server and saves automatically.
+      </div>
+      <button class="btn btn-violet" onclick="trainStart()" id="train-btn">🧠 Train on My Recordings</button>
+      <div class="train-progress-wrap" style="margin-top:12px;">
+        <div class="train-bar-track"><div class="train-bar-fill" id="train-bar"></div></div>
+        <div class="train-msg" id="train-msg">Idle</div>
+      </div>
+    </div>
+
+    <!-- Step 0: one-click setup -->
+    <div class="dev-card" style="border-color:rgba(0,245,206,.3);background:rgba(0,245,206,.04);">
+      <div class="dev-section-label" style="color:var(--teal);">🚀 One-click setup (first time)</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.7);margin-bottom:12px;line-height:1.6;">
+        Downloads ~50 real ASL clips per sign from <strong style="color:#fff;">ASL Citizen</strong>
+        (Hugging Face, no account needed), extracts landmarks with MediaPipe,
+        and trains the model — all in one click. Takes 5–15 min depending on internet speed.
+        <br><br>
+        <strong style="color:#fff;">Run this once</strong>, then use "Train on My Recordings" above
+        to fine-tune on your own signing.
+      </div>
+      <button class="btn btn-teal" onclick="prepareStart()" id="prepare-btn">⬇ Download Dataset &amp; Train</button>
+      <div class="train-progress-wrap" style="margin-top:12px;">
+        <div class="train-bar-track"><div class="train-bar-fill" id="prepare-bar" style="background:linear-gradient(90deg,var(--teal),#00c0a0);"></div></div>
+        <div class="train-msg" id="prepare-msg">Idle — press button to start</div>
+      </div>
+    </div>
+    <div style="height:8px;"></div>
+  </div>
+</div>
+
+
+
+  <!-- FLOATING FEEDBACK BUTTON — appears after every Sign→Text prediction -->
+  <button class="s2t-fb-btn" id="s2t-fb-btn" onclick="fbModalOpen()">
+    ✦ Was this correct?
+  </button>
+
+  <!-- FEEDBACK MODAL -->
+  <div class="fb-modal-backdrop" id="fb-modal" onclick="fbModalBgClick(event)">
+    <div class="fb-modal-sheet">
+      <div class="fb-modal-title">AI Prediction</div>
+      <div class="fb-modal-pred" id="fb-modal-pred">—</div>
+      <div class="fb-modal-conf" id="fb-modal-conf"></div>
+      <div class="fb-modal-q">Was the AI correct?</div>
+
+      <!-- Yes / No buttons -->
+      <div id="fb-yn-btns">
+        <button class="fb-yes-btn" onclick="fbSubmitYes()">
+          ✓ Yes — train 1x on this sign
+        </button>
+        <button class="fb-no-btn" onclick="fbShowCorrection()">
+          ✗ No — show correction grid (trains 10x)
+        </button>
+        <button class="fb-cancel-btn" onclick="fbModalClose()">Cancel</button>
+      </div>
+
+      <!-- Correction grid (shown after No) -->
+      <div id="fb-correction-area" style="display:none;">
+        <div class="fb-correction-label">Select the correct sign</div>
+        <div class="fb-correction-grid" id="fb-correction-grid"></div>
+        <button class="fb-cancel-btn" onclick="fbHideCorrection()">← Back</button>
+      </div>
+
+      <!-- Done message -->
+      <div id="fb-done-area" style="display:none;">
+        <div class="fb-done-msg" id="fb-done-msg"></div>
+        <div class="fb-training-note" id="fb-training-note"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LANGUAGE SWITCHING OVERLAY -->
+  <div class="lang-switching" id="lang-switching">
+    <div class="lang-switching-spinner"></div>
+    <div class="lang-switching-msg" id="lang-switching-msg">Switching language…</div>
+  </div>
+  <!-- ERROR MODAL -->
+  <div class="modal-backdrop" id="error-modal" onclick="modalDismiss(event)">
+    <div class="modal-sheet">
+      <div class="modal-icon" id="modal-icon">⚠️</div>
+      <div class="modal-title" id="modal-title">Something went wrong</div>
+      <div class="modal-msg" id="modal-msg"></div>
+      <div class="modal-btns">
+        <button class="modal-btn-retry" id="modal-retry-btn" onclick="modalRetry()">↻ Try Again</button>
+        <button class="modal-btn-dismiss" onclick="modalClose()">Dismiss</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ═══════════════════════════════
+// CONFIG — same origin, no port needed when served by Flask
+// ═══════════════════════════════
+const API = '';  // empty = same origin as page (Flask serves both HTML and API)
+
+// ═══════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════
+let current = 'home';
+function nav(id) {
+  if (id === current) return;
+  if (current === 'settings' && micTestActive) micTestStop();
+  const prev = document.getElementById('view-' + current);
+  const next = document.getElementById('view-' + id);
+  if (!prev || !next) return;
+  prev.classList.add('exit-left'); prev.classList.remove('active');
+  setTimeout(() => prev.classList.remove('exit-left'), 400);
+  next.classList.add('active'); next.scrollTop = 0;
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.view === id));
+  current = id;
+}
+
+// ═══════════════════════════════
+// SETTINGS
+// ═══════════════════════════════
+const appSettings = { volume: 0.8, micSensitivity: 5 };
+function applyFontSize(v) {
+  v = parseInt(v);
+  document.documentElement.style.setProperty('--fs', v + 'px');
+  document.getElementById('fs-val').textContent = v + ' px';
+  document.getElementById('fs-preview-text').style.fontSize = v + 'px';
+}
+function applyVolume(v) {
+  v = parseInt(v);
+  appSettings.volume = v / 100;
+  document.getElementById('vol-val').textContent = v + '%';
+  const p = document.getElementById('s2a-player');
+  if (p) p.volume = appSettings.volume;
+}
+function applyMicSensitivity(v) {
+  appSettings.micSensitivity = parseInt(v);
+  document.getElementById('mic-val').textContent = v + ' / 10';
+}
+function resetSettings() {
+  document.getElementById('fs-slider').value = 16; applyFontSize(16);
+  document.getElementById('vol-slider').value = 80; applyVolume(80);
+  document.getElementById('mic-slider').value = 5;  applyMicSensitivity(5);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// LANGUAGE + MODEL STATE
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// Single source of truth for which language/model is active in the UI + server
+let _activeLang = 'asl';   // 'asl' | 'lse'
+let _trainLang  = 'asl';   // which language the train tab is currently targeting
+
+const LANG_META = {
+  asl: { label: 'ASL — English',  pill: 'lmp-asl', dot: 'lmp-dot-asl', btn: 'lang-en', sr: 'en-US', amber: false },
+  lse: { label: 'LSE — Spanish',  pill: 'lmp-lse', dot: 'lmp-dot-lse', btn: 'lang-es', sr: 'es-ES', amber: true  },
+};
+
+// ── Visual sync: update every UI element that reflects active lang ─────────────
+function _applyLangUI(lang) {
+  const m = LANG_META[lang];
+  if (!m) return;
+
+  // Settings toggle buttons
+  document.getElementById('lang-en').classList.toggle('active', lang === 'asl');
+  document.getElementById('lang-es').classList.toggle('active', lang === 'lse');
+
+  // Active lang pill in Settings
+  const pill = document.getElementById('active-lang-pill');
+  if (pill) {
+    pill.className = 'lang-model-pill ' + m.pill;
+    pill.querySelector('.lmp-dot').className = 'lmp-dot ' + m.dot;
+    document.getElementById('active-lang-text').textContent = m.label;
+  }
+
+  // Speech recognition language
+  if (window.a2sRecog) {
+    a2sRecog.lang = m.sr;
+  }
+
+  // UI placeholder strings — inline bilingual swap (no external STRINGS dependency)
+  const isEs = lang === 'lse';
+  const PH = {
+    en: {
+      heroSubtitle: 'Choose a translation mode to get started.',
+      s2aPh: 'Video will appear here',
+      a2sPh: 'Sign language video will appear here',
+      t2sPh: 'Sign language video will appear here',
+      s2tPh: 'Your transcription will appear here…',
+    },
+    es: {
+      heroSubtitle: 'Elige un modo de traducción para empezar.',
+      s2aPh: 'El vídeo aparecerá aquí',
+      a2sPh: 'El vídeo en lengua de signos aparecerá aquí',
+      t2sPh: 'El vídeo en lengua de signos aparecerá aquí',
+      s2tPh: 'Tu transcripción aparecerá aquí…',
+    },
+  };
+  const ph = isEs ? PH.es : PH.en;
+  try {
+    const heroSub = document.querySelector('.view-home .hero-subtitle');
+    if (heroSub) heroSub.textContent = ph.heroSubtitle;
+    const s2aPhEl = document.getElementById('s2a-ph'); if (s2aPhEl) s2aPhEl.textContent = ph.s2aPh;
+    const a2sPhEl = document.getElementById('a2s-ph'); if (a2sPhEl) a2sPhEl.textContent = ph.a2sPh;
+    const t2sPhEl = document.getElementById('t2s-ph'); if (t2sPhEl) t2sPhEl.textContent = ph.t2sPh;
+    const s2tPhEl = document.getElementById('s2t-ph'); if (s2tPhEl) s2tPhEl.textContent = ph.s2tPh;
+  } catch(_) {}
+
+  _activeLang = lang;
+}
+
+// ── switchLang: update UI + call server to hot-swap model ─────────────────────
+async function switchLang(lang) {
+  if (lang === _activeLang) return;
+
+  // Show switching overlay
+  const overlay = document.getElementById('lang-switching');
+  const msg     = document.getElementById('lang-switching-msg');
+  msg.textContent = `Switching to ${LANG_META[lang]?.label || lang}…`;
+  overlay.classList.add('show');
+
+  try {
+    const r = await fetch('/switch-language', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ lang }),
+    });
+    const d = await r.json();
+
+    if (!r.ok) {
+      msg.textContent = '❌ ' + (d.error || 'Switch failed');
+      setTimeout(() => overlay.classList.remove('show'), 2200);
+      return;
+    }
+
+    // Update UI
+    _applyLangUI(lang);
+
+    if (!d.model_ready) {
+      msg.textContent = `⚠ ${LANG_META[lang]?.label} loaded — model not trained yet`;
+      setTimeout(() => overlay.classList.remove('show'), 2800);
+    } else {
+      msg.textContent = `✅ ${LANG_META[lang]?.label} — ${d.model_labels?.length || 0} signs ready`;
+      setTimeout(() => overlay.classList.remove('show'), 1600);
+    }
+
+    // Refresh language tab if open
+    if (document.getElementById('dt-lang')?.classList.contains('active')) {
+      langTabRefresh();
+    }
+
+  } catch(e) {
+    msg.textContent = '❌ Server unreachable: ' + e.message;
+    setTimeout(() => overlay.classList.remove('show'), 2500);
+  }
+}
+
+// Keep old setLang as alias in case anything calls it
+function setLang(lang) {
+  switchLang(lang === 'es' ? 'lse' : 'asl');
+}
+
+// ── Train language sub-tab ────────────────────────────────────────────────────
+function setTrainLang(lang) {
+  _trainLang = lang;
+  const m = LANG_META[lang];
+  ['asl','lse'].forEach(l => {
+    const el = document.getElementById('tst-' + l);
+    if (!el) return;
+    el.className = 'dev-subtab' + (l === lang ? (' active-' + l) : '');
+  });
+  const pill = document.getElementById('train-lang-pill');
+  if (pill) {
+    pill.className = 'lang-model-pill ' + m.pill;
+    pill.querySelector('.lmp-dot').className = 'lmp-dot ' + m.dot;
+    document.getElementById('train-lang-text').textContent = m.label;
+  }
+  // Reload sample counts for the selected training language
+  trainLoadSamplesFor(lang);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// LANGUAGE DEV TAB
+// ═══════════════════════════════════════════════════════════════════════════════
+
+async function langTabRefresh() {
+  try {
+    const r = await fetch('/health');
+    const d = await r.json();
+
+    const activeLang = d.active_lang || 'asl';
+    _applyLangUI(activeLang);
+
+    // Update ASL row
+    const aslReady   = d.asl_ready;
+    const aslLabels  = activeLang === 'asl' ? (d.model_labels || []) : [];
+    const aslActive  = activeLang === 'asl';
+    _setLangRow('asl', aslReady, aslActive,
+      aslReady ? (aslLabels.length ? `${aslLabels.length} signs loaded` : 'Trained, loading…')
+               : 'Not trained — run dataset_download.py');
+
+    // Update LSE row
+    const lseReady   = d.lse_ready;
+    const lseLabels  = activeLang === 'lse' ? (d.model_labels || []) : [];
+    const lseActive  = activeLang === 'lse';
+    _setLangRow('lse', lseReady, lseActive,
+      lseReady ? (lseLabels.length ? `${lseLabels.length} signs loaded` : 'Trained, loading…')
+               : 'Not trained — run dataset_download.py');
+
+    // Load sample counts for both languages
+    const [aslSamples, lseSamples] = await Promise.all([
+      fetch('/samples?lang=asl').then(r => r.json()).catch(() => ({})),
+      fetch('/samples?lang=lse').then(r => r.json()).catch(() => ({})),
+    ]);
+    _renderSampleGrid('lang-asl-samples', aslSamples);
+    _renderSampleGrid('lang-lse-samples', lseSamples);
+
+  } catch(e) {
+    ['asl','lse'].forEach(l => {
+      _setLangRow(l, false, false, 'Server unreachable');
+    });
+  }
+}
+
+function _setLangRow(lang, ready, active, sub) {
+  const badge = document.getElementById('lang-' + lang + '-badge');
+  const subEl = document.getElementById('lang-' + lang + '-sub');
+  const btn   = document.getElementById('lang-' + lang + '-btn');
+  if (!badge) return;
+  if (active) {
+    badge.className = 'model-badge mb-active';
+    badge.textContent = '● Active';
+  } else if (ready) {
+    badge.className = 'model-badge mb-ready';
+    badge.textContent = '✓ Ready';
+  } else {
+    badge.className = 'model-badge mb-missing';
+    badge.textContent = '✗ Not trained';
+  }
+  if (subEl) subEl.textContent = sub;
+  if (btn)   btn.disabled = active;
+}
+
+function _renderSampleGrid(elId, counts) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  const entries = Object.entries(counts || {});
+  if (!entries.length) {
+    el.innerHTML = '<span style="font-size:13px;color:rgba(255,255,255,.4);">No samples yet</span>';
+    return;
+  }
+  el.innerHTML = entries.map(([label, count]) =>
+    `<div class="sign-pill has-data">
+      <span>${label}</span>
+      <span class="sign-pill-count">${count}</span>
+    </div>`
+  ).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════════
+// PATCH devTab to include 'lang'
+// ═══════════════════════════════════════════════════════════════════════════════
+function devTab(tab) {
+  ['diag','lang','train'].forEach(t => {
+    document.getElementById('dt-'+t)?.classList.toggle('active', t===tab);
+    const body = document.getElementById('db-'+t);
+    if (body) body.style.display = t===tab ? 'flex' : 'none';
+  });
+  if (tab === 'lang') langTabRefresh();
+  if (tab === 'train') trainLoadSamples();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PATCH trainLoadSamples to be language-aware
+// ═══════════════════════════════════════════════════════════════════════════════
+async function trainLoadSamples() {
+  trainLoadSamplesFor(_trainLang);
+}
+
+async function trainLoadSamplesFor(lang) {
+  try {
+    const r = await fetch('/samples?lang=' + lang);
+    const d = await r.json();
+    const grid = document.getElementById('sample-grid');
+    if (!grid) return;
+    const entries = Object.entries(d);
+    if (!entries.length) {
+      grid.innerHTML = '<span style="font-size:13px;color:rgba(255,255,255,.4);">No data collected yet for ' + (LANG_META[lang]?.label || lang) + '.</span>';
+      return;
+    }
+    grid.innerHTML = entries.map(([label, count]) =>
+      `<div class="sign-pill has-data">
+        <span>${label}</span>
+        <span class="sign-pill-count">${count} frames</span>
+        <button class="del-btn" onclick="trainDeleteLabel('${label}')" title="Delete">✕</button>
+      </div>`
+    ).join('');
+  } catch(e) {
+    const grid = document.getElementById('sample-grid');
+    if (grid) grid.innerHTML = '<span style="color:var(--rose);font-size:13px;">Could not load — server offline?</span>';
+  }
+}
+
+async function trainDeleteLabel(label) {
+  if (!confirm(`Delete all "${label}" samples for ${LANG_META[_trainLang]?.label || _trainLang}?`)) return;
+  await fetch('/delete-label', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ label, lang: _trainLang }),
+  });
+  trainLoadSamplesFor(_trainLang);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PATCH recStop to send lang header
+// ═══════════════════════════════════════════════════════════════════════════════
+async function recStop() {
+  if (!trainRec || trainRec.state === 'inactive') {
+    document.getElementById('rec-start-btn').disabled = false;
+    document.getElementById('rec-stop-btn').disabled  = true;
+    if (trainStream) { trainStream.getTracks().forEach(t=>t.stop()); trainStream = null; }
+    document.getElementById('train-vid').srcObject = null;
+    return;
+  }
+
+  const label = document.getElementById('train-label').value.trim().toLowerCase();
+  document.getElementById('rec-status').textContent = '⏳ Stopping and sending to server…';
+
+  await new Promise(res => { trainRec.onstop = res; try { trainRec.stop(); } catch(_) { res(); } });
+  if (trainStream) { trainStream.getTracks().forEach(t=>t.stop()); trainStream = null; }
+  document.getElementById('train-vid').srcObject = null;
+  document.getElementById('rec-start-btn').disabled = false;
+  document.getElementById('rec-stop-btn').disabled  = true;
+
+  if (!trainBuf.length) {
+    document.getElementById('rec-status').textContent = '⚠️ No data captured.';
+    return;
+  }
+
+  const blob = new Blob(trainBuf, { type: trainBuf[0].type });
+  const langLabel = LANG_META[_trainLang]?.label || _trainLang;
+  document.getElementById('rec-status').textContent =
+    `📤 Sending ${(blob.size/1024).toFixed(0)} KB to server (${langLabel})…`;
+
+  try {
+    const r = await fetch('/collect-video', {
+      method:  'POST',
+      headers: {
+        'Content-Type':  'application/octet-stream',
+        'X-Sign-Label':  label,
+        'X-Sign-Lang':   _trainLang,
+      },
+      body: blob,
+    });
+    const d = await r.json();
+    if (r.ok) {
+      document.getElementById('rec-status').textContent =
+        `✅ Saved ${d.stored} frames for "${label}" (${langLabel}) — ` +
+        `total: ${(d.counts||{})[label] || d.stored}`;
+      trainLoadSamplesFor(_trainLang);
+    } else {
+      document.getElementById('rec-status').textContent = '❌ ' + (d.error || 'Server error');
+    }
+  } catch(e) {
+    document.getElementById('rec-status').textContent = '❌ Upload failed: ' + e.message;
+  }
+  trainBuf = [];
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PATCH trainStart to target _trainLang
+// ═══════════════════════════════════════════════════════════════════════════════
+async function trainStart() {
+  const btn = document.getElementById('train-btn');
+  btn.disabled    = true;
+  btn.textContent = '⏳ Training…';
+  document.getElementById('train-msg').textContent = 'Starting…';
+  document.getElementById('train-bar').style.width = '2%';
+
+  const langLabel = LANG_META[_trainLang]?.label || _trainLang;
+
+  try {
+    const r = await fetch('/train', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ lang: _trainLang }),
+    });
+    const d = await r.json();
+    if (!r.ok) {
+      document.getElementById('train-msg').textContent = '❌ ' + (d.error || 'Error');
+      btn.disabled = false; btn.textContent = '🧠 Train on My Recordings';
+      return;
+    }
+  } catch(e) {
+    document.getElementById('train-msg').textContent = '❌ ' + e.message;
+    btn.disabled = false; btn.textContent = '🧠 Train on My Recordings';
+    return;
+  }
+
+  clearInterval(_trainPollInterval);
+  _trainPollInterval = setInterval(async () => {
+    try {
+      const r = await fetch('/train-status'); const d = await r.json();
+      document.getElementById('train-bar').style.width = (d.pct || 0) + '%';
+      document.getElementById('train-msg').textContent = d.msg || '…';
+      if (d.state === 'done' || d.state === 'error') {
+        clearInterval(_trainPollInterval);
+        btn.disabled    = false;
+        btn.textContent = '🧠 Train Again';
+        if (d.state === 'done') {
+          trainLoadSamplesFor(_trainLang);
+          langTabRefresh();
+        }
+      }
+    } catch(_) {}
+  }, 800);
+}
+
+// ── DIAGNOSTICS HELPERS ──────────────────────────────────────────────────────
+function diagSet(id, status, detail) {
+  const cls = {ok:'diag-ok',fail:'diag-fail',warn:'diag-warn',run:'diag-run',skip:'diag-skip'};
+  const lbl = {ok:'✓ OK',fail:'✗ FAIL',warn:'⚠ WARN',run:'Running…',skip:'—'};
+  const b = document.getElementById('db-'+id);
+  b.className = 'diag-badge ' + (cls[status]||'diag-skip');
+  b.textContent = lbl[status]||status;
+  if (detail !== undefined) document.getElementById('dd-'+id).textContent = detail;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PATCH diagRunAll — dual model rows
+// ═══════════════════════════════════════════════════════════════════════════════
+async function diagRunAll() {
+  const btn = document.getElementById('diag-run-btn');
+  btn.disabled    = true;
+  btn.textContent = '⏳ Running…';
+  document.getElementById('diag-summary').textContent = 'Running tests…';
+  let passed = 0, total = 0;
+
+  // 1. Server health — checks both models
+  total += 3; // health + asl model + lse model
+  diagSet('health','run','Contacting server…');
+  diagSet('model-asl','run','Checking…');
+  diagSet('model-lse','run','Checking…');
+  try {
+    const r = await fetch('/health'); const d = await r.json();
+    diagSet('health','ok',
+      `Active: ${(d.active_lang||'?').toUpperCase()} | Clips: ${d.clips_count} | TTS: ${d.tts}`);
+    passed++;
+
+    if (d.asl_ready) {
+      diagSet('model-asl','ok',
+        d.active_lang === 'asl' && d.model_labels?.length
+          ? `Active — ${d.model_labels.length} signs`
+          : 'Trained (not active)');
+      passed++;
+    } else {
+      diagSet('model-asl','warn','Not trained — run dataset_download.py');
+    }
+
+    if (d.lse_ready) {
+      diagSet('model-lse','ok',
+        d.active_lang === 'lse' && d.model_labels?.length
+          ? `Active — ${d.model_labels.length} signs`
+          : 'Trained (not active)');
+      passed++;
+    } else {
+      diagSet('model-lse','warn','Not trained — run dataset_download.py');
+    }
+  } catch(e) {
+    diagSet('health','fail','Cannot reach server: ' + e.message);
+    diagSet('model-asl','skip','Server unreachable');
+    diagSet('model-lse','skip','Server unreachable');
+  }
+
+  // 2. Clip delivery
+  total++;
+  diagSet('clip','run','Fetching test clip…');
+  try {
+    const t0 = Date.now();
+    const r  = await fetch('/test-clip');
+    if (r.ok) {
+      const blob = await r.blob();
+      diagSet('clip','ok', `${(blob.size/1024).toFixed(0)} KB in ${Date.now()-t0}ms`); passed++;
+    } else {
+      diagSet('clip','warn','No clips on server — add MP4 files to asl_clips/');
+    }
+  } catch(e) { diagSet('clip','fail', e.message); }
+
+  // 3. Microphone
+  total++;
+  diagSet('mic','run','Requesting mic…');
+  try {
+    const s = await navigator.mediaDevices.getUserMedia({audio:true});
+    s.getTracks().forEach(t=>t.stop());
+    diagSet('mic','ok','Accessible'); passed++;
+  } catch(e) { diagSet('mic','fail', e.message); }
+
+  // 4. Speech recognition
+  total++;
+  const SR = window.SpeechRecognition || window['webkitSpeechRecognition'];
+  if (SR) { diagSet('sr','ok','Web Speech API supported'); passed++; }
+  else     { diagSet('sr','fail','Use Chrome on desktop'); }
+
+  // 5. Camera
+  total++;
+  diagSet('cam','run','Requesting camera…');
+  try {
+    const s = await navigator.mediaDevices.getUserMedia({video:true});
+    s.getTracks().forEach(t=>t.stop());
+    diagSet('cam','ok','Accessible'); passed++;
+  } catch(e) { diagSet('cam','fail', e.message); }
+
+  // 6. Audio→Sign round-trip
+  total++;
+  diagSet('a2s','run','Sending known word to clip resolver…');
+  try {
+    const t0 = Date.now();
+    const r  = await fetch('/audio-to-sign', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({text: testWord})
+    });
+    const d = await r.json();
+    if (r.ok && d.clips) {
+      diagSet('a2s','ok', `${d.clips.length} clip(s) in ${Date.now()-t0}ms`); passed++;
+    } else {
+      diagSet('a2s','warn', d.error || 'No clips matched');
+    }
+  } catch(e) { diagSet('a2s','fail', e.message); }
+
+  btn.disabled    = false;
+  btn.textContent = '↻ Run Again';
+  const emoji = passed === total ? '✅' : passed >= total - 1 ? '⚠️' : '❌';
+  document.getElementById('diag-summary').textContent =
+    `${emoji} ${passed}/${total} tests passed`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// On app load — sync UI with server's active language
+// ═══════════════════════════════════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const r = await fetch('/health');
+    const d = await r.json();
+    const lang = d.active_lang || 'asl';
+    _applyLangUI(lang);
+    // Default train tab to same language as active model
+    setTrainLang(lang);
+  } catch(_) {
+    // Server offline — default to ASL UI
+    _applyLangUI('asl');
+  }
+});
+
+
+
+// ═══════════════════════════════
+// ERROR MODAL
+// ═══════════════════════════════
+let _retryFn = null;
+function showError(opts) {
+  document.getElementById('modal-icon').textContent  = opts.icon  || '⚠️';
+  document.getElementById('modal-title').textContent = opts.title || 'Something went wrong';
+  document.getElementById('modal-msg').textContent   = opts.msg   || '';
+  const rb = document.getElementById('modal-retry-btn');
+  rb.textContent   = opts.retryLabel || '↻ Try Again';
+  rb.style.display = opts.retryFn ? 'flex' : 'none';
+  _retryFn = opts.retryFn || null;
+  document.getElementById('error-modal').classList.add('show');
+}
+function modalClose()   { document.getElementById('error-modal').classList.remove('show'); _retryFn = null; }
+function modalRetry()   { const fn = _retryFn; modalClose(); if (fn) fn(); }
+function modalDismiss(e){ if (e.target === document.getElementById('error-modal')) modalClose(); }
+
+// ═══════════════════════════════
+// HELPERS
+// ═══════════════════════════════
+function setStatus(id, msg) { const el = document.getElementById(id); if (el) el.textContent = msg; }
+function resetUI(startId, stopId) {
+  const s = document.getElementById(startId), p = document.getElementById(stopId);
+  if (s) s.disabled = false;
+  if (p) p.disabled = true;
+}
+function stopStream(s) { if (s) s.getTracks().forEach(t => t.stop()); }
+function getMime(video) {
+  const list = video
+    ? ['video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm']
+    : ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus'];
+  return list.find(m => MediaRecorder.isTypeSupported(m)) || '';
+}
+function safeStop(rec) {
+  return new Promise(res => {
+    if (!rec || rec.state === 'inactive') { res(); return; }
+    rec.onstop = res;
+    try { rec.stop(); } catch(_) { res(); }
+  });
+}
+function permErr(e, cam) {
+  if (location.protocol === 'file:')
+    return '⚠️ Open via https://hear-me-sign.local:8000 — camera and mic require HTTPS.';
+  const n = e && e.name;
+  if (n === 'NotAllowedError' || n === 'PermissionDeniedError')
+    return cam ? '🔒 Camera & mic blocked. Tap 🔒 in address bar, allow both, then refresh.'
+               : '🔒 Microphone blocked. Tap 🔒 in address bar, allow Microphone, then refresh.';
+  if (n === 'NotFoundError') return cam ? '📷 No camera/mic found.' : '🎙️ No microphone found.';
+  if (n === 'NotReadableError') return '⚠️ Camera/mic in use by another app. Close it and retry.';
+  return '⚠️ Could not access ' + (cam ? 'camera/mic' : 'mic') + '. (' + (n||e) + ')';
+}
+
+// ── fetch wrapper ─────────────────────────────────────────────────────────────
+async function apiFetch(endpoint, opts = {}) {
+  const r = await fetch(API + endpoint, opts);
+  const ct = r.headers.get('content-type') || '';
+  if (ct.includes('application/json')) {
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`);
+    return j;
+  }
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  return await r.blob();
+}
+
+// ── clip queue player ─────────────────────────────────────────────────────────
+// Plays a list of clip URLs one after another in the given <video> element.
+// Shows dots below the player indicating progress.
+function playClips(videoEl, phEl, dotsEl, clipUrls, onDone) {
+  phEl.style.display = 'none';
+  videoEl.style.display = 'block';
+
+  // Build progress dots
+  dotsEl.innerHTML = '';
+  const dots = clipUrls.map((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'clip-dot';
+    d.id = dotsEl.id + '-dot-' + i;
+    dotsEl.appendChild(d);
+    return d;
+  });
+
+  let idx = 0;
+  function playNext() {
+    if (idx >= clipUrls.length) {
+      if (onDone) onDone();
+      return;
+    }
+    dots.forEach((d, i) => {
+      d.className = 'clip-dot' + (i < idx ? ' done' : i === idx ? ' playing' : '');
+    });
+    videoEl.src = API + clipUrls[idx];
+    videoEl.play().catch(console.warn);
+    idx++;
+  }
+  videoEl.onended = playNext;
+  videoEl.onerror = () => { console.warn('clip error'); playNext(); };
+  playNext();
+}
+
+// ═══════════════════════════════
+// WEB AUDIO — waveform bars
+// ═══════════════════════════════
+function createAnalyser(stream) {
+  const ctx = new (window.AudioContext || window['webkitAudioContext'])();
+  const src = ctx.createMediaStreamSource(stream);
+  const an  = ctx.createAnalyser();
+  an.fftSize = 256; an.smoothingTimeConstant = 0.75;
+  src.connect(an);
+  return { ctx, an };
+}
+function runBars(an, bars, getSens) {
+  const freq = new Uint8Array(an.frequencyBinCount);
+  let alive = true, raf;
+  (function draw() {
+    if (!alive) return;
+    raf = requestAnimationFrame(draw);
+    an.getByteFrequencyData(freq);
+    const s = getSens();
+    bars.forEach((b, i) => {
+      const bin = Math.floor(i * freq.length / bars.length * 0.65);
+      const raw = Math.min(255, freq[bin] * (s / 4));
+      b.style.height = (4 + raw / 255 * 44) + 'px';
+      b.style.background = raw > 170 ? 'var(--rose)' : raw > 90 ? 'var(--amber)' : 'var(--teal)';
+    });
+  })();
+  return () => { alive = false; cancelAnimationFrame(raf); bars.forEach(b => { b.style.height = '4px'; b.style.background = 'var(--amber)'; }); };
+}
+function runLevel(an, fillEl, dbEl, hintEl, getSens) {
+  const td = new Uint8Array(an.fftSize);
+  let alive = true, raf;
+  const hints = ['Silence / very quiet','Quiet','Normal speaking volume','Loud','Very loud'];
+  (function draw() {
+    if (!alive) return;
+    raf = requestAnimationFrame(draw);
+    an.getByteTimeDomainData(td);
+    let s2 = 0;
+    for (let i = 0; i < td.length; i++) { const v = (td[i]-128)/128; s2 += v*v; }
+    const rms = Math.sqrt(s2/td.length);
+    const pct = Math.round(Math.min(1, rms*(getSens()/3))*100);
+    fillEl.style.width = pct+'%';
+    fillEl.style.background = pct<40?'var(--teal)':pct<75?'var(--amber)':'var(--rose)';
+    const db = rms>0.0001 ? Math.round(20*Math.log10(rms)) : null;
+    dbEl.textContent   = db!==null ? db+' dB' : 'Silence';
+    hintEl.textContent = hints[pct<5?0:pct<25?1:pct<60?2:pct<85?3:4];
+  })();
+  return () => { alive=false; cancelAnimationFrame(raf); fillEl.style.width='0%'; dbEl.textContent='—'; hintEl.textContent='Start the test to see levels'; };
+}
+
+// ═══════════════════════════════
+// SIGN → AUDIO
+// Records webcam video → POST raw bytes → server returns MP3
+// ═══════════════════════════════
+let s2aStream=null, s2aRec=null, s2aBuf=[];
+async function s2aStart() {
+  s2aBuf=[];
+  document.getElementById('s2a-audio').classList.remove('show');
+  document.getElementById('s2a-start').disabled=true;
+  document.getElementById('s2a-stop').disabled=false;
+  try { s2aStream = await navigator.mediaDevices.getUserMedia({video:true,audio:true}); }
+  catch(e) {
+    resetUI('s2a-start','s2a-stop');
+    const m = permErr(e,true);
+    setStatus('s2a-status','❌ '+m);
+    showError({icon:'🎥',title:'Camera & Mic Needed',msg:m,retryFn:s2aStart,retryLabel:'↻ Try Again'});
+    return;
+  }
+  document.getElementById('s2a-vid').srcObject = s2aStream;
+  s2aRec = new MediaRecorder(s2aStream, {mimeType: getMime(true)});
+  s2aRec.ondataavailable = e => { if(e.data&&e.data.size>0) s2aBuf.push(e.data); };
+  s2aRec.start(100);
+  document.getElementById('s2a-rec').classList.add('on');
+  setStatus('s2a-status','🔴 Recording — press Stop when done.');
+}
+async function s2aStop() {
+  document.getElementById('s2a-stop').disabled=true;
+  setStatus('s2a-status','⏳ Stopping…');
+  await safeStop(s2aRec);
+  stopStream(s2aStream); s2aStream=null;
+  document.getElementById('s2a-vid').srcObject=null;
+  document.getElementById('s2a-rec').classList.remove('on');
+  if (!s2aBuf.length) {
+    resetUI('s2a-start','s2a-stop');
+    setStatus('s2a-status','⚠️ Nothing was recorded.');
+    return;
+  }
+  const blob = new Blob(s2aBuf, {type: s2aBuf[0].type}); s2aBuf=[];
+  setStatus('s2a-status','📤 Sending '+( blob.size/1024).toFixed(1)+' KB…');
+  try {
+    const mp3Blob = await apiFetch('/sign-to-audio', {method:'POST', body:blob, headers:{'Content-Type':'application/octet-stream'}});
+    const p = document.getElementById('s2a-player');
+    p.src = URL.createObjectURL(mp3Blob);
+    p.volume = appSettings.volume;
+    document.getElementById('s2a-audio').classList.add('show');
+    p.play();
+    setStatus('s2a-status','✅ Audio received — playing.');
+  } catch(err) {
+    setStatus('s2a-status','❌ '+err.message);
+    const notTrained = err.message && (err.message.includes("hasn't been trained") || err.message.includes('503'));
+    if (notTrained) {
+      showError({icon:'🧠', title:'Model Not Trained', msg:'The sign recognition model hasn\'t been trained yet. Use Dev Panel → Train tab to record signs and train, or press "Download Dataset & Train" for automatic setup.', retryFn:null});
+    } else {
+      showError({icon:'🤟',title:'Sign Not Recognised',msg:err.message,retryFn:s2aStart,retryLabel:'↻ Record Again'});
+    }
+  } finally {
+    resetUI('s2a-start','s2a-stop');
+  }
+}
+
+// ═══════════════════════════════
+// AUDIO → SIGN
+// Browser SpeechRecognition → send transcript text → server returns clip URLs
+// ═══════════════════════════════
+let a2sRecog=null, a2sStream=null, a2sStopBars=null, a2sCtx=null, a2sActive=false;
+let a2sGotResult=false; // guard against onend firing before onresult on mobile
+const A2S_BARS = () => ['wb1','wb2','wb3','wb4','wb5','wb6','wb7','wb8','wb9','wb10','wb11','wb12'].map(id=>document.getElementById(id));
+
+async function a2sStart() {
+  const SR = window.SpeechRecognition || window['webkitSpeechRecognition'];
+  if (!SR) {
+    showError({icon:'🎙️',title:'Speech Not Supported',msg:'Your browser does not support speech recognition. Please use Chrome or Safari.',retryFn:null});
+    return;
+  }
+  document.getElementById('a2s-result').style.display='none';
+  document.getElementById('a2s-ph').style.display='block';
+  document.getElementById('a2s-dots').innerHTML='';
+  document.getElementById('a2s-heard-txt').textContent='—';
+  document.getElementById('a2s-start').disabled=true;
+  document.getElementById('a2s-stop').disabled=false;
+  a2sGotResult = false;
+
+  // Microphone stream for waveform visualiser only
+  try { a2sStream = await navigator.mediaDevices.getUserMedia({audio:true}); }
+  catch(e) {
+    resetUI('a2s-start','a2s-stop');
+    const m = permErr(e,false);
+    setStatus('a2s-status','❌ '+m);
+    showError({icon:'🎙️',title:'Microphone Needed',msg:m,retryFn:a2sStart,retryLabel:'↻ Try Again'});
+    return;
+  }
+
+  const {ctx,an} = createAnalyser(a2sStream); a2sCtx=ctx;
+  a2sStopBars = runBars(an, A2S_BARS(), ()=>appSettings.micSensitivity);
+
+  const wl = document.getElementById('a2s-wave-lbl');
+  wl.textContent='Listening…'; wl.classList.add('on');
+  setStatus('a2s-status','🎙️ Speak now — say: blood, help, water…');
+
+  a2sRecog = new SR();
+  // continuous=true prevents mobile browsers from auto-stopping before a result fires
+  a2sRecog.continuous = true;
+  a2sRecog.interimResults = false;
+  a2sRecog.lang = (LANG_META[_activeLang] || LANG_META['asl']).sr;
+  a2sRecog.maxAlternatives = 1;
+
+  a2sRecog.onresult = async (ev) => {
+    // Take the most recent final result
+    const result = ev.results[ev.results.length - 1];
+    if (!result.isFinal) return;
+    if (a2sGotResult) return; // already processing a result
+    a2sGotResult = true;
+
+    const transcript = result[0].transcript.trim();
+    document.getElementById('a2s-heard-txt').textContent = '"' + transcript + '"';
+    setStatus('a2s-status','📤 Heard: "' + transcript + '" — fetching sign…');
+
+    // Stop recognition immediately so it doesn't keep listening
+    try { a2sRecog.stop(); } catch(_) {}
+
+    try {
+      const data = await apiFetch('/audio-to-sign', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({text: transcript})
+      });
+      setStatus('a2s-status','✅ Playing sign for: "' + (data.transcript||transcript) + '"');
+      playClips(
+        document.getElementById('a2s-result'),
+        document.getElementById('a2s-ph'),
+        document.getElementById('a2s-dots'),
+        data.clips,
+        () => setStatus('a2s-status','✅ Done. Press Start to try another phrase.')
+      );
+    } catch(err) {
+      // Distinguish "no clip" (404) from a real network/server error
+      const msg = err.message || '';
+      const noClip = msg.toLowerCase().includes('no sign') || msg.includes('404');
+      if (noClip) {
+        setStatus('a2s-status','⚠️ No sign clip for "' + transcript + '". Try: blood, help, water, yes, no.');
+        showError({icon:'🤷',title:'Word Not In Dictionary',msg:'No sign clip found for "' + transcript + '". Try a simpler word.',retryFn:a2sStart,retryLabel:'↻ Try Again'});
+      } else {
+        setStatus('a2s-status','❌ '+msg);
+        showError({icon:'🎙️',title:'Error',msg:msg,retryFn:a2sStart,retryLabel:'↻ Try Again'});
+      }
+    }
+    a2sStop();
+  };
+
+  a2sRecog.onerror = (ev) => {
+    if (a2sGotResult) return; // ignore errors after we already got a result
+    if (ev.error === 'no-speech') {
+      setStatus('a2s-status','⚠️ No speech detected. Press Start and speak clearly.');
+    } else if (ev.error === 'not-allowed') {
+      showError({icon:'🔒',title:'Mic Blocked',msg:'Microphone access was denied. Allow it in your browser settings.',retryFn:a2sStart});
+    } else if (ev.error === 'aborted') {
+      // User pressed Stop — not an error
+    } else {
+      setStatus('a2s-status','⚠️ Speech error: ' + ev.error + '. Try again.');
+    }
+    a2sStop();
+  };
+
+  // Only auto-stop on onend if we never got a result (guards mobile race condition)
+  a2sRecog.onend = () => {
+    if (a2sActive && !a2sGotResult) {
+      setStatus('a2s-status','⚠️ Recognition ended without a result. Press Start and try again.');
+      a2sStop();
+    } else if (a2sActive) {
+      a2sStop();
+    }
+  };
+
+  a2sActive = true;
+  try { a2sRecog.start(); } catch(e) {
+    setStatus('a2s-status','❌ Could not start speech recognition: ' + e.message);
+    a2sStop();
+  }
+}
+
+function a2sStop() {
+  a2sActive = false;
+  if (a2sStopBars) { a2sStopBars(); a2sStopBars=null; }
+  if (a2sRecog)   { try { a2sRecog.stop(); } catch(_){} a2sRecog=null; }
+  if (a2sCtx)     { a2sCtx.close(); a2sCtx=null; }
+  stopStream(a2sStream); a2sStream=null;
+  const wl = document.getElementById('a2s-wave-lbl');
+  wl.textContent='Microphone inactive'; wl.classList.remove('on');
+  resetUI('a2s-start','a2s-stop');
+}
+
+// ═══════════════════════════════
+// TEXT → SIGN
+// POST JSON {text} → receive {clips:[...]} → play sequentially
+// ═══════════════════════════════
+async function t2sSend() {
+  const text = document.getElementById('t2s-input').value.trim();
+  if (!text) { setStatus('t2s-status','⚠️ Please type something first.'); return; }
+  const btn = document.getElementById('t2s-send'); btn.disabled=true;
+  setStatus('t2s-status','⏳ Looking up sign clips…');
+  try {
+    const data = await apiFetch('/text-to-sign', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({text})
+    });
+    setStatus('t2s-status','✅ Playing '+data.clips.length+' clip'+(data.clips.length!==1?'s':'')+' for: "'+data.transcript+'"');
+    playClips(
+      document.getElementById('t2s-result'),
+      document.getElementById('t2s-ph'),
+      document.getElementById('t2s-dots'),
+      data.clips,
+      () => setStatus('t2s-status','✅ Done. Try another phrase!')
+    );
+  } catch(err) {
+    setStatus('t2s-status','❌ '+err.message);
+    showError({icon:'✍️',title:'No Sign Found',msg:err.message,retryFn:t2sSend,retryLabel:'↻ Try Again'});
+  } finally {
+    btn.disabled=false;
+  }
+}
+
+// ═══════════════════════════════
+// SIGN → TEXT
+// Records webcam video → POST raw bytes → server returns {text}
+// ═══════════════════════════════
+let s2tStream=null, s2tRec=null, s2tBuf=[];
+async function s2tStart() {
+  s2tBuf=[];
+  document.getElementById('s2t-start').disabled=true;
+  document.getElementById('s2t-stop').disabled=false;
+  try { s2tStream = await navigator.mediaDevices.getUserMedia({video:true,audio:false}); }
+  catch(e) {
+    resetUI('s2t-start','s2t-stop');
+    const m = permErr(e,true);
+    setStatus('s2t-status','❌ '+m);
+    showError({icon:'📷',title:'Camera Needed',msg:m,retryFn:s2tStart,retryLabel:'↻ Try Again'});
+    return;
+  }
+  document.getElementById('s2t-vid').srcObject = s2tStream;
+  s2tRec = new MediaRecorder(s2tStream, {mimeType: getMime(true)});
+  s2tRec.ondataavailable = e => { if(e.data&&e.data.size>0) s2tBuf.push(e.data); };
+  s2tRec.start(100);
+  document.getElementById('s2t-rec').classList.add('on');
+  setStatus('s2t-status','🔴 Recording — hold sign clearly, then press Stop.');
+}
+async function s2tStop() {
+  document.getElementById('s2t-stop').disabled=true;
+  setStatus('s2t-status','⏳ Stopping…');
+  await safeStop(s2tRec);
+  stopStream(s2tStream); s2tStream=null;
+  document.getElementById('s2t-vid').srcObject=null;
+  document.getElementById('s2t-rec').classList.remove('on');
+  if (!s2tBuf.length) { resetUI('s2t-start','s2t-stop'); setStatus('s2t-status','⚠️ Nothing recorded.'); return; }
+  const blob = new Blob(s2tBuf, {type: s2tBuf[0].type}); s2tBuf=[];
+  setStatus('s2t-status','📤 Sending '+(blob.size/1024).toFixed(1)+' KB for recognition…');
+  try {
+    const data = await apiFetch('/sign-to-text', {method:'POST', body:blob, headers:{'Content-Type':'application/octet-stream'}});
+    const o = document.getElementById('s2t-out');
+    o.textContent = data.text; o.classList.remove('ph');
+    const pct = data.confidence ? Math.round(data.confidence * 100) : null;
+    const confStr = pct !== null ? ` (${pct}% confidence)` : '';
+    setStatus('s2t-status','✅ Recognised: "'+data.text+'"'+confStr);
+    // Store session for feedback modal and show floating button
+    _fbSessionId = data.session_id || null;
+    _fbPredicted = data.text || '';
+    _fbConf      = data.confidence || 0;
+    fbBtnShow();
+if (current === 'feedback') fbViewInit();
+  } catch(err) {
+    const notTrained = err.message && (err.message.includes("hasn't been trained") || err.message.includes("not_trained") || err.message.includes('503'));
+    if (notTrained) {
+      setStatus('s2t-status','⚠️ Model not trained yet.');
+      showError({icon:'🧠', title:'Model Not Trained', msg:'The sign recognition model hasn\'t been trained yet. Use Dev Panel → Train tab to record signs and train, or press "Download Dataset & Train" for automatic setup.', retryFn:null});
+    } else {
+      setStatus('s2t-status','❌ '+err.message);
+      showError({icon:'📝',title:'Recognition Failed',msg:err.message,retryFn:s2tStart,retryLabel:'↻ Try Again'});
+    }
+  } finally {
+    resetUI('s2t-start','s2t-stop');
+  }
+}
+function s2tClear() {
+  const o = document.getElementById('s2t-out'); o.textContent='Your transcription will appear here…'; o.classList.add('ph');
+  setStatus('s2t-status','');
+  fbBtnHide();
+}
+
+// ═══════════════════════════════
+// MIC TEST
+// ═══════════════════════════════
+let micTestStream=null, micTestCtx=null, micTestStopBars=null, micTestStopLevel=null;
+let micTestRecog=null, micTestActive=false;
+const TEST_BARS = () => ['twb1','twb2','twb3','twb4','twb5','twb6','twb7','twb8','twb9','twb10','twb11','twb12'].map(id=>document.getElementById(id));
+
+async function micTestStart() {
+  if (micTestActive) return;
+  document.getElementById('mic-test-start').disabled=true;
+  document.getElementById('mic-test-stop').disabled=false;
+  const st = document.getElementById('mic-test-status');
+  st.textContent='🎙️ Requesting microphone…'; st.classList.add('active');
+  try { micTestStream = await navigator.mediaDevices.getUserMedia({audio:true}); }
+  catch(e) { st.textContent=permErr(e,false); st.classList.remove('active'); resetUI('mic-test-start','mic-test-stop'); return; }
+  micTestActive=true;
+  const {ctx,an} = createAnalyser(micTestStream); micTestCtx=ctx;
+  micTestStopBars  = runBars(an, TEST_BARS(), ()=>appSettings.micSensitivity);
+  micTestStopLevel = runLevel(an, document.getElementById('mic-bar-fill'), document.getElementById('mic-db-val'), document.getElementById('mic-db-hint'), ()=>appSettings.micSensitivity);
+  const SR = window.SpeechRecognition || window['webkitSpeechRecognition'];
+  if (SR) {
+    micTestRecog = new SR(); micTestRecog.continuous=true; micTestRecog.interimResults=true; micTestRecog.lang=(LANG_META[_activeLang]||LANG_META['asl']).sr;
+    let final='';
+    micTestRecog.onresult = ev => {
+      let interim='';
+      for(let i=ev.resultIndex;i<ev.results.length;i++){
+        if(ev.results[i].isFinal) final+=ev.results[i][0].transcript+' ';
+        else interim+=ev.results[i][0].transcript;
+      }
+      const el=document.getElementById('mic-speech-out'); el.textContent=(final+interim).trim()||'…'; el.classList.remove('ph');
+    };
+    micTestRecog.onerror = () => { document.getElementById('mic-speech-out').textContent='Speech recognition blocked — level meter still works.'; };
+    micTestRecog.onend = () => { if(micTestActive){ try{micTestRecog.start();}catch(_){} } };
+    try { micTestRecog.start(); } catch(_) {}
+    st.textContent='🎙️ Listening — speak and watch the level bar. Adjust Mic Sensitivity until bar reaches middle at normal volume.';
+  } else {
+    st.textContent='🎙️ Level meter active (speech-to-text not supported in this browser).';
+  }
+}
+
+function micTestStop() {
+  micTestActive=false;
+  if(micTestStopBars){ micTestStopBars(); micTestStopBars=null; }
+  if(micTestStopLevel){ micTestStopLevel(); micTestStopLevel=null; }
+  if(micTestRecog){ try{micTestRecog.onend=null;micTestRecog.stop();}catch(_){} micTestRecog=null; }
+  if(micTestCtx){ micTestCtx.close(); micTestCtx=null; }
+  stopStream(micTestStream); micTestStream=null;
+  const sp=document.getElementById('mic-speech-out'); sp.textContent='Your words will appear here as you speak…'; sp.classList.add('ph');
+  TEST_BARS().forEach(b=>{ b.style.height='4px'; b.style.background='var(--amber)'; });
+  resetUI('mic-test-start','mic-test-stop');
+  const st=document.getElementById('mic-test-status'); st.textContent='Stopped — press Start Test to try again'; st.classList.remove('active');
+}
+
+// ═══════════════════════════════
+
+// ═══════════════════════════
+// DEV PANEL
+// ═══════════════════════════
+
+function devOpen() {
+  document.getElementById('dev-panel').classList.add('open');
+  document.getElementById('dev-fab').style.display = 'none';
+  trainLoadSamples();
+}
+
+// ── DATASET DOWNLOAD + TRAIN ─────────────────────────────────────────────────
+
+let _preparePoll = null;
+
+async function prepareStart() {
+  const btn = document.getElementById('prepare-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Running…';
+  document.getElementById('prepare-msg').textContent = 'Contacting server…';
+  document.getElementById('prepare-bar').style.width = '1%';
+
+  try {
+    const r = await fetch('/prepare', {method: 'POST'});
+    const d = await r.json();
+    if (!r.ok) {
+      document.getElementById('prepare-msg').textContent = '❌ ' + (d.error || 'Server error');
+      btn.disabled = false; btn.textContent = '⬇ Download Dataset & Train';
+      return;
+    }
+  } catch(e) {
+    document.getElementById('prepare-msg').textContent = '❌ ' + e.message;
+    btn.disabled = false; btn.textContent = '⬇ Download Dataset & Train';
+    return;
+  }
+
+  clearInterval(_preparePoll);
+  _preparePoll = setInterval(async () => {
+    try {
+      const r = await fetch('/prepare-status');
+      const d = await r.json();
+      document.getElementById('prepare-bar').style.width = (d.pct || 0) + '%';
+      document.getElementById('prepare-msg').textContent = d.msg || '…';
+      if (d.state === 'done' || d.state === 'error') {
+        clearInterval(_preparePoll);
+        btn.disabled = false;
+        btn.textContent = d.state === 'done' ? '✅ Done — run again?' : '↻ Retry';
+        if (d.state === 'done') trainLoadSamples();
+      }
+    } catch(_) {}
+  }, 1200);
+}
+
+function devClose() {
+  document.getElementById('dev-panel').classList.remove('open');
+  document.getElementById('dev-fab').style.display = 'flex';
+  recStop();
+}
+
+// ── DATA COLLECTION ─────────────────────────────────────────────────────────
+
+let trainStream=null, trainRec=null, trainBuf=[], trainFrameCount=0;
+
+async function recStart() {
+  const label = document.getElementById('train-label').value.trim().toLowerCase();
+  if (!label) { alert('Enter a sign label first (e.g. "hello").'); return; }
+
+  trainBuf = []; trainFrameCount = 0;
+  document.getElementById('rec-fill').style.width = '0%';
+  document.getElementById('rec-count').textContent = `0 frames captured`;
+  document.getElementById('rec-start-btn').disabled = true;
+  document.getElementById('rec-stop-btn').disabled = false;
+  document.getElementById('rec-status').textContent = `🔴 Recording "${label}" — perform the sign clearly and repeatedly…`;
+
+  try {
+    trainStream = await navigator.mediaDevices.getUserMedia({video:true, audio:false});
+  } catch(e) {
+    document.getElementById('rec-status').textContent = '❌ Camera blocked: ' + e.message;
+    document.getElementById('rec-start-btn').disabled = false;
+    document.getElementById('rec-stop-btn').disabled = true;
+    return;
+  }
+
+  document.getElementById('train-vid').srcObject = trainStream;
+  const mime = ['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'].find(m=>MediaRecorder.isTypeSupported(m))||'';
+  trainRec = new MediaRecorder(trainStream, {mimeType: mime});
+  trainRec.ondataavailable = e => { if(e.data&&e.data.size>0) trainBuf.push(e.data); };
+
+  // Count frames via requestAnimationFrame as a proxy for recording progress
+  let frameRaf;
+  const countFrames = () => {
+    if (trainRec && trainRec.state !== 'inactive') {
+      trainFrameCount++;
+      const pct = Math.min(100, (trainFrameCount / 300) * 100);
+      document.getElementById('rec-fill').style.width = pct + '%';
+      document.getElementById('rec-count').textContent = `${trainFrameCount} frames captured`;
+      frameRaf = requestAnimationFrame(countFrames);
+    }
+  };
+  frameRaf = requestAnimationFrame(countFrames);
+
+  trainRec.onstop = () => cancelAnimationFrame(frameRaf);
+  trainRec.start(100);
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// LEARN TO SIGN
+// Flow: pick word → watch demo clip → record attempt → AI checks → pass/retry
+// Passes when confidence >= LEARN_THRESHOLD for the target word specifically.
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const LEARN_THRESHOLD = 0.88;  // 88% confidence required to pass
+
+let _learnWord     = null;   // currently selected word
+let _learnAttempts = 0;      // attempts this word
+let _learnStream   = null;
+let _learnRec      = null;
+let _learnBuf      = [];
+
+// ── Init: load available words from /health ───────────────────────────────────
+async function learnInit() {
+  const grid = document.getElementById('learn-word-grid');
+  grid.innerHTML = '<div style="padding:0 16px;color:rgba(255,255,255,.4);font-size:13px;">Loading…</div>';
+  try {
+    const d = await apiFetch('/health');
+    const labels = (d.model_labels || []).sort();
+    if (!labels.length) {
+      grid.innerHTML = '<div style="padding:0 16px;color:var(--rose);font-size:13px;">No trained signs found. Train a model first.</div>';
+      return;
+    }
+    grid.innerHTML = labels.map(w =>
+      `<button class="learn-word-btn" onclick="learnSelectWord('${w}')">${w}</button>`
+    ).join('');
+  } catch(e) {
+    grid.innerHTML = '<div style="padding:0 16px;color:var(--rose);font-size:13px;">Could not reach server.</div>';
+  }
+}
+
+// ── Word selection ────────────────────────────────────────────────────────────
+function learnSelectWord(word) {
+  _learnWord = word;
+  document.querySelectorAll('.learn-word-btn').forEach(b => {
+    b.classList.toggle('selected', b.textContent === word);
+  });
+  document.getElementById('learn-start-btn').disabled = false;
+}
+
+// ── Start: go to watch step ───────────────────────────────────────────────────
+async function learnStart() {
+  if (!_learnWord) return;
+  _learnAttempts = 0;
+  learnShowStep('watch');
+
+  document.getElementById('learn-watch-label').textContent =
+    'Watching: "' + _learnWord + '" — study the hand shape and movement';
+
+  const watchedBtn = document.getElementById('learn-watched-btn');
+  watchedBtn.disabled = true;
+
+  // Fetch the demo clip via text-to-sign
+  try {
+    const d = await apiFetch('/text-to-sign', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({text: _learnWord})
+    });
+    const vid = document.getElementById('learn-demo-vid');
+    vid.src = d.clips[0];
+    vid.loop = true;
+    vid.onloadeddata = () => { watchedBtn.disabled = false; };
+    vid.onerror = () => {
+      watchedBtn.disabled = false;
+      document.getElementById('learn-watch-label').textContent =
+        'Could not load demo clip — press to continue anyway';
+    };
+    vid.load();
+    vid.play().catch(() => {});
+  } catch(e) {
+    watchedBtn.disabled = false;
+    document.getElementById('learn-watch-label').textContent =
+      'Demo clip unavailable — press to continue anyway';
+  }
+}
+
+// ── Go to record step ─────────────────────────────────────────────────────────
+function learnGoRecord() {
+  // Stop demo video
+  const vid = document.getElementById('learn-demo-vid');
+  vid.pause(); vid.src = '';
+  learnShowStep('try');
+  setStatus('learn-try-status', 'Press Start when ready — sign "' + _learnWord + '" clearly.');
+}
+
+// ── Recording ─────────────────────────────────────────────────────────────────
+async function learnRecStart() {
+  _learnBuf = [];
+  document.getElementById('learn-rec-start').disabled = true;
+  document.getElementById('learn-rec-stop').disabled  = false;
+  try {
+    _learnStream = await navigator.mediaDevices.getUserMedia({video: true, audio: false});
+  } catch(e) {
+    document.getElementById('learn-rec-start').disabled = false;
+    document.getElementById('learn-rec-stop').disabled  = true;
+    setStatus('learn-try-status', '❌ ' + permErr(e, true));
+    return;
+  }
+  document.getElementById('learn-cam-vid').srcObject = _learnStream;
+  _learnRec = new MediaRecorder(_learnStream, {mimeType: getMime(true)});
+  _learnRec.ondataavailable = e => { if (e.data && e.data.size > 0) _learnBuf.push(e.data); };
+  _learnRec.start(100);
+  document.getElementById('learn-rec-pill').classList.add('on');
+  setStatus('learn-try-status', '🔴 Recording — sign "' + _learnWord + '" clearly, then press Stop.');
+}
+
+async function learnRecStop() {
+  document.getElementById('learn-rec-stop').disabled = true;
+  setStatus('learn-try-status', '⏳ Checking your sign…');
+  await safeStop(_learnRec);
+  stopStream(_learnStream); _learnStream = null;
+  document.getElementById('learn-cam-vid').srcObject = null;
+  document.getElementById('learn-rec-pill').classList.remove('on');
+
+  if (!_learnBuf.length) {
+    document.getElementById('learn-rec-start').disabled = false;
+    document.getElementById('learn-rec-stop').disabled  = true;
+    setStatus('learn-try-status', '⚠️ Nothing recorded — try again.');
+    return;
+  }
+
+  const blob = new Blob(_learnBuf, {type: _learnBuf[0].type});
+  _learnBuf = [];
+  _learnAttempts++;
+
+  try {
+    const data = await apiFetch('/learn-check', {
+      method: 'POST',
+      body: blob,
+      headers: {
+        'Content-Type':   'application/octet-stream',
+        'X-Target-Word':  _learnWord,
+      }
+    });
+
+    learnShowResult(data.passed, data.recognised, data.target_conf);
+
+  } catch(err) {
+    // Server returned an error (low confidence, no hand detected, etc.)
+    // Try to extract partial confidence if available
+    learnShowResult(false, null, 0, err.message);
+  }
+}
+
+// ── Show result ───────────────────────────────────────────────────────────────
+function learnShowResult(passed, recognised, conf, errMsg) {
+  learnShowStep('result');
+
+  const ring      = document.getElementById('learn-result-ring');
+  const title     = document.getElementById('learn-result-title');
+  const sub       = document.getElementById('learn-result-sub');
+  const bar       = document.getElementById('learn-conf-bar');
+  const barLabel  = document.getElementById('learn-conf-label');
+  const attempts  = document.getElementById('learn-attempt-count');
+  const retryBtn  = document.getElementById('learn-retry-btn');
+  const nextBtn   = document.getElementById('learn-next-btn');
+
+  const pct = Math.round(conf * 100);
+
+  if (passed) {
+    ring.textContent = '✅';
+    ring.className   = 'learn-attempt-ring pass';
+    title.textContent = 'Nailed it!';
+    sub.textContent   = `"${_learnWord}" — ${pct}% confidence`;
+    sub.style.color   = 'var(--teal)';
+    bar.style.background = '#00f5ce';
+    retryBtn.style.display = 'none';
+    nextBtn.textContent = '🎉 Next word ▶';
+  } else {
+    ring.textContent = '❌';
+    ring.className   = 'learn-attempt-ring fail';
+    if (errMsg) {
+      title.textContent = 'Not recognised';
+      sub.textContent   = 'Make sure your hand is clearly visible and sign slowly.';
+    } else if (recognised && recognised !== _learnWord) {
+      title.textContent = `Looks like "${recognised}"`;
+      sub.textContent   = `Target: "${_learnWord}" — needed ${Math.round(LEARN_THRESHOLD*100)}%, got ${pct}%`;
+    } else {
+      title.textContent = `Almost — ${pct}%`;
+      sub.textContent   = `Need ${Math.round(LEARN_THRESHOLD*100)}% to pass. Keep practising!`;
+    }
+    sub.style.color = 'var(--rose)';
+    bar.style.background = pct > 60 ? 'var(--amber)' : 'var(--rose)';
+    retryBtn.style.display = '';
+    nextBtn.textContent = 'Skip word ▶';
+  }
+
+  bar.style.width  = pct + '%';
+  barLabel.textContent = `Confidence: ${pct}% / needed: ${Math.round(LEARN_THRESHOLD*100)}%`;
+  attempts.textContent = `Attempt ${_learnAttempts}`;
+  document.getElementById('learn-rec-start').disabled = false;
+  document.getElementById('learn-rec-stop').disabled  = true;
+}
+
+// ── Pick a new word (resets to picker) ───────────────────────────────────────
+function learnPickNew() {
+  _learnWord = null;
+  _learnAttempts = 0;
+  document.querySelectorAll('.learn-word-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('learn-start-btn').disabled = true;
+  learnShowStep('pick');
+}
+
+// ── Exit learn mode ───────────────────────────────────────────────────────────
+function learnExit() {
+  stopStream(_learnStream); _learnStream = null;
+  const vid = document.getElementById('learn-demo-vid');
+  vid.pause(); vid.src = '';
+  _learnWord = null; _learnAttempts = 0;
+  nav('home');
+}
+
+// ── Helper: show only the active step ────────────────────────────────────────
+function learnShowStep(step) {
+  ['pick','watch','try','result'].forEach(s => {
+    const el = document.getElementById('learn-step-' + s);
+    if (el) el.classList.toggle('active', s === step);
+  });
+}
+
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// FEEDBACK SYSTEM
+// Floating button appears after every Sign→Text prediction.
+// Correct → stores 1 copy of the video, retrains immediately.
+// Wrong   → user picks correct label, stores 10 copies, retrains immediately.
+// ═══════════════════════════════════════════════════════════════════════════════
+
+let _fbSessionId  = null;
+let _fbPredicted  = '';
+let _fbConf       = 0;
+let _fbLabels     = [];
+
+function fbBtnShow() {
+  const btn = document.getElementById('s2t-fb-btn');
+  if (btn) btn.classList.add('show');
+}
+function fbBtnHide() {
+  const btn = document.getElementById('s2t-fb-btn');
+  if (btn) btn.classList.remove('show');
+}
+
+function fbModalOpen() {
+  const pct = Math.round(_fbConf * 100);
+  document.getElementById('fb-modal-pred').textContent = _fbPredicted || '(unknown)';
+  document.getElementById('fb-modal-conf').textContent = pct ? pct + '% confidence' : '';
+  document.getElementById('fb-yn-btns').style.display     = '';
+  document.getElementById('fb-correction-area').style.display = 'none';
+  document.getElementById('fb-done-area').style.display   = 'none';
+  document.getElementById('fb-modal').classList.add('show');
+}
+
+function fbModalClose() {
+  document.getElementById('fb-modal').classList.remove('show');
+}
+
+function fbModalBgClick(e) {
+  if (e.target === document.getElementById('fb-modal')) fbModalClose();
+}
+
+async function fbSubmitYes() {
+  if (!_fbSessionId) { fbModalClose(); return; }
+  document.getElementById('fb-yn-btns').style.display = 'none';
+  document.getElementById('fb-done-area').style.display = '';
+  document.getElementById('fb-done-msg').textContent = '✓ Saved — training 1x on this sign…';
+  document.getElementById('fb-training-note').textContent = 'Retraining model in background';
+
+  try {
+    await fetch('/feedback', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({session_id: _fbSessionId, correct: true})
+    });
+    document.getElementById('fb-done-msg').textContent = '✅ Done! Model trained 1x on "' + _fbPredicted + '"';
+    document.getElementById('fb-training-note').textContent = 'Retraining started in background';
+  } catch(e) {
+    document.getElementById('fb-done-msg').textContent = '⚠️ Could not send feedback: ' + e.message;
+  }
+
+  fbBtnHide();
+  setTimeout(fbModalClose, 2000);
+}
+
+async function fbShowCorrection() {
+  document.getElementById('fb-yn-btns').style.display = 'none';
+  document.getElementById('fb-correction-area').style.display = '';
+
+  // Load labels if needed
+  if (!_fbLabels.length) {
+    try {
+      const h = await fetch('/health').then(r => r.json());
+      _fbLabels = (h.model_labels || []).sort();
+    } catch(_) {}
+  }
+
+  const grid = document.getElementById('fb-correction-grid');
+  grid.innerHTML = '';
+  (_fbLabels.length ? _fbLabels : ['(no labels)']).forEach(lbl => {
+    const btn = document.createElement('button');
+    btn.className = 'fb-correction-btn';
+    btn.textContent = lbl;
+    btn.onclick = () => fbSubmitCorrection(lbl);
+    grid.appendChild(btn);
+  });
+}
+
+function fbHideCorrection() {
+  document.getElementById('fb-correction-area').style.display = 'none';
+  document.getElementById('fb-yn-btns').style.display = '';
+}
+
+async function fbSubmitCorrection(correctLabel) {
+  if (!_fbSessionId) { fbModalClose(); return; }
+  document.getElementById('fb-correction-area').style.display = 'none';
+  document.getElementById('fb-done-area').style.display = '';
+  document.getElementById('fb-done-msg').textContent = '⏳ Saving 10x as "' + correctLabel + '"…';
+  document.getElementById('fb-training-note').textContent = 'Heavy correction — retraining model in background';
+
+  // Update s2t output to show the correction
+  const o = document.getElementById('s2t-out');
+  if (o) { o.textContent = correctLabel; o.classList.remove('ph'); }
+  setStatus('s2t-status', '✅ Corrected to: "' + correctLabel + '" — trained 10x');
+
+  try {
+    await fetch('/feedback', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({session_id: _fbSessionId, correct: false, label: correctLabel})
+    });
+    document.getElementById('fb-done-msg').textContent = '✅ Saved 10x as "' + correctLabel + '" — model is retraining';
+    document.getElementById('fb-training-note').textContent = 'The AI will be better next time';
+  } catch(e) {
+    document.getElementById('fb-done-msg').textContent = '⚠️ Could not send: ' + e.message;
+  }
+
+  fbBtnHide();
+  setTimeout(fbModalClose, 2500);
+}
+
+
+// CURSOR
+// ═══════════════════════════════
+const cur=document.getElementById('cur'), curR=document.getElementById('curR');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
+(function tick(){
+  cur.style.cssText=`left:${mx}px;top:${my}px;`;
+  rx+=(mx-rx)*.1; ry+=(my-ry)*.1;
+  curR.style.cssText=`left:${rx}px;top:${ry}px;`;
+  requestAnimationFrame(tick);
+})();
+document.querySelectorAll('button,a,textarea,input[type=range]').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cur.style.width='18px';cur.style.height='18px';curR.style.width='48px';curR.style.height='48px';curR.style.opacity='.7';});
+  el.addEventListener('mouseleave',()=>{cur.style.width='10px';cur.style.height='10px';curR.style.width='32px';curR.style.height='32px';curR.style.opacity='.4';});
+});
+
+function fbViewInit() {
+  if (_fbSessionId) {
+    document.getElementById('fb-view-idle').style.display  = 'none';
+    document.getElementById('fb-view-ready').style.display = '';
+    document.getElementById('fbv-pred').textContent = _fbPredicted || '(unknown)';
+    const pct = Math.round(_fbConf * 100);
+    document.getElementById('fbv-conf').textContent = pct ? pct + '% confidence' : '';
+    document.getElementById('fbv-yn').style.display        = '';
+    document.getElementById('fbv-correction').style.display = 'none';
+    document.getElementById('fbv-done').style.display      = 'none';
+  } else {
+    document.getElementById('fb-view-idle').style.display  = '';
+    document.getElementById('fb-view-ready').style.display = 'none';
+  }
+}
+
+async function fbViewYes() {
+  if (!_fbSessionId) return;
+  document.getElementById('fbv-yn').style.display   = 'none';
+  document.getElementById('fbv-done').style.display = '';
+  document.getElementById('fbv-done-msg').textContent  = '⏳ Training on "' + _fbPredicted + '"…';
+  document.getElementById('fbv-done-note').textContent = 'Sending to server';
+  try {
+    await fetch('/feedback', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({session_id:_fbSessionId,correct:true})});
+    document.getElementById('fbv-done-msg').textContent  = '✅ Trained 1× on "' + _fbPredicted + '"';
+    document.getElementById('fbv-done-note').textContent = 'Model is retraining in background';
+  } catch(e) {
+    document.getElementById('fbv-done-msg').textContent  = '⚠️ Could not send: ' + e.message;
+  }
+  fbBtnHide(); _fbSessionId = null;
+}
+
+async function fbViewShowCorrection() {
+  document.getElementById('fbv-yn').style.display        = 'none';
+  document.getElementById('fbv-correction').style.display = '';
+  if (!_fbLabels.length) {
+    try { const h = await fetch('/health').then(r=>r.json()); _fbLabels = (h.model_labels||[]).sort(); } catch(_) {}
+  }
+  const grid = document.getElementById('fbv-grid');
+  grid.innerHTML = '';
+  (_fbLabels.length ? _fbLabels : ['(no labels)']).forEach(lbl => {
+    const b = document.createElement('button');
+    b.className = 'fb-correction-btn'; b.textContent = lbl;
+    b.onclick = () => fbViewSubmitCorrection(lbl);
+    grid.appendChild(b);
+  });
+}
+
+function fbViewHideCorrection() {
+  document.getElementById('fbv-correction').style.display = 'none';
+  document.getElementById('fbv-yn').style.display        = '';
+}
+
+async function fbViewSubmitCorrection(correctLabel) {
+  if (!_fbSessionId) return;
+  document.getElementById('fbv-correction').style.display = 'none';
+  document.getElementById('fbv-done').style.display       = '';
+  document.getElementById('fbv-done-msg').textContent  = '⏳ Saving 10× as "' + correctLabel + '"…';
+  document.getElementById('fbv-done-note').textContent = 'Heavy correction — retraining in background';
+  try {
+    await fetch('/feedback', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({session_id:_fbSessionId,correct:false,label:correctLabel})});
+    document.getElementById('fbv-done-msg').textContent  = '✅ Saved 10× as "' + correctLabel + '"';
+    document.getElementById('fbv-done-note').textContent = 'The AI will be better next time';
+    const o = document.getElementById('s2t-out'); if(o){o.textContent=correctLabel;o.classList.remove('ph');}
+    setStatus('s2t-status','✅ Corrected to: "'+correctLabel+'"');
+  } catch(e) {
+    document.getElementById('fbv-done-msg').textContent = '⚠️ ' + e.message;
+  }
+  fbBtnHide(); _fbSessionId = null;
+}
+
+</script>
+</body>
+</html>
