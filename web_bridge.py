@@ -624,16 +624,6 @@ def sign_to_text():
 def feedback():
     """
     Confirm or correct a prediction.
-
-    Body (JSON):
-      {"session_id": "abc123", "correct": true}
-        → confirms the prediction was right, stores clip under predicted label
-
-      {"session_id": "abc123", "correct": false, "label": "fiebre"}
-        → corrects the prediction, stores clip under the given label
-
-    After FEEDBACK_RETRAIN_AFTER confirmed corrections, retrains both models
-    in the background automatically.
     """
     data = request.get_json(silent=True) or {}
     sid  = (data.get("session_id") or "").strip()
@@ -1164,5 +1154,5 @@ if __name__ == "__main__":
         _cfg.PUBLIC_URL = tunnel_url
         print(f"[bridge] Tunnel URL set to: {tunnel_url}")
 
-    app.run(host="0.0.0.0", port=8000, debug=False, threaded=True,
+    app.run(host="0.0.0.0", port=8132, debug=False, threaded=True,
             use_reloader=False)
