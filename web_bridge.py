@@ -1154,5 +1154,5 @@ if __name__ == "__main__":
         _cfg.PUBLIC_URL = tunnel_url
         print(f"[bridge] Tunnel URL set to: {tunnel_url}")
 
-    app.run(host="0.0.0.0", port=8132, debug=False, threaded=True,
+    app.run(host="0.0.0.0", port=8000, debug=False, threaded=True,
             use_reloader=False)
