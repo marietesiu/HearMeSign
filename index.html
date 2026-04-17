@@ -7,19 +7,30 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-
-  ::view-transition-group(*),
-  ::view-transition-old(*),
-  ::view-transition-new(*) {
-    animation-duration: 0.25s;
-    animation-timing-function: cubic-bezier(0.19, 1, 0.22, 1);
-  }
-
 :root{
   --bg:#070b12;--surface:#0d1422;--border:rgba(255,255,255,.15);
-  --teal:#00f5ce;--amber:#ffb83f;--violet:#c4aaff;--rose:#ff7aaa;
+  --teal:#00f5ce;--amber:#ffb83f;--violet:#c4aaff;--rose:#ff7aaa;--green:#4ade80;
   --nav-h:72px;--fs:16px;
 }
+/* ── LIGHT MODE ── */
+body.light{
+  --bg:#f0f4f8;--surface:#ffffff;--border:rgba(0,0,0,.1);
+}
+body.light,body.light #app{color:#0d1422;}
+body.light body::before{opacity:.012;}
+body.light #cur{background:#0d1422;}
+body.light #curR{border-color:rgba(0,0,0,.25);}
+body.light .orb{opacity:.045!important;}
+
+/* ── TRANSITIONS ── */
+body,body *{transition-property:background,background-color,color,border-color,box-shadow,opacity;transition-duration:.25s;transition-timing-function:ease;}
+/* keep animation-heavy or layout props fast */
+.view,.nav-item,.tool-card,.btn,.back-btn,.modal-backdrop,.modal-sheet,.dev-panel,.lang-picker-overlay{transition:none;}
+.view{transition:transform .38s cubic-bezier(.4,0,.2,1),opacity .3s ease;}
+.tool-card{transition:transform .22s,border-color .25s,box-shadow .25s,background .25s;}
+.btn{transition:transform .18s,box-shadow .18s,opacity .18s,background .25s;}
+.lang-picker-overlay{transition:opacity .25s,visibility .25s;}
+
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none;}
 html,body{height:100%;overflow:hidden;}
 body{background:var(--bg);color:#fff;font-family:'DM Sans',sans-serif;font-size:var(--fs);-webkit-font-smoothing:antialiased;cursor:none;}
@@ -51,9 +62,6 @@ body::before{content:'';position:fixed;inset:0;z-index:1;pointer-events:none;bac
 .nav-item[data-view="t2s"].active .nav-icon{background:rgba(196,170,255,.15);box-shadow:0 4px 16px rgba(196,170,255,.25);}
 .nav-item[data-view="s2t"].active .nav-icon{background:rgba(255,122,170,.15);box-shadow:0 4px 16px rgba(255,122,170,.25);}
 .nav-item[data-view="settings"].active .nav-icon{background:rgba(255,255,255,.12);box-shadow:0 4px 16px rgba(255,255,255,.1);}
-.nav-item[data-view="feedback"].active .nav-icon{background:rgba(196,170,255,.15);box-shadow:0 4px 16px rgba(196,170,255,.25);}
-.nav-item[data-view="feedback"].active .nav-pip{background:var(--violet);}
-.nav-item[data-view="learn"].active .nav-icon{background:rgba(255,200,80,.15);box-shadow:0 4px 16px rgba(255,200,80,.25);}
 .nav-label{font-size:9px;font-weight:700;color:rgba(255,255,255,.5);transition:color .25s;white-space:nowrap;}
 .nav-item.active .nav-label{color:#fff;}
 .nav-pip{position:absolute;bottom:2px;width:4px;height:4px;border-radius:2px;background:transparent;transition:background .25s;}
@@ -62,7 +70,6 @@ body::before{content:'';position:fixed;inset:0;z-index:1;pointer-events:none;bac
 .nav-item[data-view="t2s"].active .nav-pip{background:var(--violet);}
 .nav-item[data-view="s2t"].active .nav-pip{background:var(--rose);}
 .nav-item[data-view="settings"].active .nav-pip{background:#fff;}
-.nav-item[data-view="learn"].active .nav-pip{background:#ffc850;}
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 8px;position:sticky;top:0;z-index:10;background:linear-gradient(to bottom,var(--bg) 65%,transparent);}
 .back-btn{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.14);border:2px solid rgba(255,255,255,.3);border-radius:16px;padding:13px 22px 13px 16px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:17px;font-weight:700;color:#fff;transition:background .2s,border-color .2s,transform .15s;}
 .back-btn:hover{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.55);transform:translateX(-2px);}
@@ -178,8 +185,118 @@ audio.result{width:100%;border-radius:8px;}
 .fs-preview{margin:0 16px 18px;background:rgba(0,245,206,.06);border:1px solid rgba(0,245,206,.2);border-radius:14px;padding:16px 20px;}
 .fs-preview-label{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);margin-bottom:8px;opacity:.85;}
 .fs-preview-text{color:#fff;font-weight:500;line-height:1.6;}
-/* LANG TOGGLE */
-.lang-toggle{display:flex;gap:6px;}
+/* ── THEME TOGGLE BUTTON ── */
+.theme-toggle-btn{
+  display:flex;align-items:center;justify-content:center;
+  width:42px;height:42px;border-radius:50%;
+  border:2px solid rgba(255,255,255,.25);
+  background:rgba(255,255,255,.1);
+  color:#fff;font-size:20px;cursor:pointer;
+  transition:background .25s,border-color .25s,transform .18s;
+  flex-shrink:0;
+}
+.theme-toggle-btn:hover{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.5);transform:rotate(20deg) scale(1.08);}
+.theme-toggle-btn:active{transform:scale(.93);}
+
+body.light .theme-toggle-btn{
+  border-color:rgba(0,0,0,.18);
+  background:rgba(0,0,0,.07);
+  color:#0d1422;
+}
+body.light .theme-toggle-btn:hover{background:rgba(0,0,0,.13);border-color:rgba(0,0,0,.35);}
+
+/* ── LIGHT MODE — BOTTOM NAV ── */
+body.light .bottom-nav{background:rgba(240,244,248,.96);border-top-color:rgba(0,0,0,.1);}
+body.light .nav-label{color:rgba(0,0,0,.45);}
+body.light .nav-item.active .nav-label{color:#0d1422;}
+body.light .nav-item:active{background:rgba(0,0,0,.06);}
+
+/* ── LIGHT MODE — TOPBAR ── */
+body.light .topbar{background:linear-gradient(to bottom,var(--bg) 65%,transparent);}
+body.light .back-btn{background:rgba(0,0,0,.07);border-color:rgba(0,0,0,.18);color:#0d1422;}
+body.light .back-btn:hover{background:rgba(0,0,0,.13);border-color:rgba(0,0,0,.35);}
+
+/* ── LIGHT MODE — TOOL CARDS ── */
+body.light .tool-card{background:#ffffff;border-color:rgba(0,0,0,.09);}
+body.light .tool-card::after{background:linear-gradient(135deg,rgba(0,0,0,.03),transparent);}
+body.light .card-title{color:#0d1422;}
+body.light .card-desc{color:rgba(13,20,34,.65);}
+body.light .card-chevron{color:rgba(0,0,0,.35);}
+
+/* ── LIGHT MODE — PANELS / STATUS / SETTINGS ── */
+body.light .panel{background:#ffffff;border-color:rgba(0,0,0,.1);}
+body.light .panel-label{color:#0d1422;border-bottom-color:rgba(0,0,0,.07);}
+body.light .status-strip{background:#ffffff;border-color:rgba(0,0,0,.1);color:#0d1422;}
+body.light .output-text{color:#0d1422;}
+body.light .output-text.ph{color:rgba(0,0,0,.35);}
+body.light textarea.tool-input{color:#0d1422;}
+body.light textarea.tool-input::placeholder{color:rgba(0,0,0,.3);}
+body.light .char-c{color:rgba(0,0,0,.45);}
+body.light .settings-section-title{color:rgba(0,0,0,.4);}
+body.light .settings-card{background:#ffffff;border-color:rgba(0,0,0,.1);}
+body.light .setting-row{border-bottom-color:rgba(0,0,0,.06);}
+body.light .setting-row.clickable:hover{background:rgba(0,0,0,.04);}
+body.light .setting-label{color:#0d1422;}
+body.light .setting-desc{color:rgba(13,20,34,.55);}
+body.light .range-val{color:#0d1422;}
+body.light .sf-range{background:rgba(0,0,0,.12);}
+body.light .wave-status{color:rgba(0,0,0,.5);}
+body.light .hero-sub{color:rgba(13,20,34,.8);}
+body.light .home-settings-btn{background:linear-gradient(135deg,rgba(196,170,255,.18),rgba(196,170,255,.08));border-color:rgba(196,170,255,.45);}
+body.light p[style*="rgba(255,255,255,.38)"]{color:rgba(0,0,0,.38)!important;}
+
+/* ── LIGHT MODE — LEARN / FEEDBACK / MISC ── */
+body.light .learn-sign-btn{background:#fff;border-color:rgba(0,0,0,.09);}
+body.light .learn-sign-name{color:#0d1422;}
+body.light .learn-instruction{background:rgba(0,0,0,.04);color:rgba(13,20,34,.75);}
+body.light .fb-result-card{background:#fff;}
+body.light .fb-pred-label{color:rgba(0,0,0,.45);}
+body.light .fb-done-card{background:#fff;border-color:rgba(0,0,0,.1);}
+body.light .fb-done-title{color:#0d1422;}
+body.light .fb-done-note{color:rgba(0,0,0,.5);}
+
+/* ── LANG PICKER OVERLAY ── */
+.lang-picker-overlay{
+  position:fixed;inset:0;z-index:700;
+  background:rgba(7,11,18,.75);backdrop-filter:blur(14px);
+  display:flex;align-items:flex-end;justify-content:center;
+  padding:0 0 calc(var(--nav-h) + 16px);
+  visibility:hidden;opacity:0;
+  transition:opacity .25s,visibility .25s;
+}
+.lang-picker-overlay.show{visibility:visible;opacity:1;}
+.lang-picker-overlay.show #lang-picker{transform:translateY(0);}
+#lang-picker{
+  background:#0f1827;border:1px solid rgba(255,255,255,.14);
+  border-radius:24px 24px 20px 20px;padding:28px 24px 24px;
+  width:100%;max-width:480px;
+  transform:translateY(40px);
+  transition:transform .32s cubic-bezier(.22,1,.36,1);
+  box-shadow:0 -4px 40px rgba(0,0,0,.5);
+}
+body.light #lang-picker{background:#ffffff;border-color:rgba(0,0,0,.12);box-shadow:0 -4px 40px rgba(0,0,0,.15);}
+.lang-picker-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#fff;text-align:center;margin-bottom:6px;}
+.lang-picker-sub{font-size:14px;color:rgba(255,255,255,.6);text-align:center;margin-bottom:22px;font-weight:500;}
+body.light .lang-picker-title{color:#0d1422;}
+body.light .lang-picker-sub{color:rgba(0,0,0,.5);}
+.lang-picker-grid{display:flex;flex-direction:column;gap:10px;margin-bottom:16px;}
+.lang-picker-option{display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:16px;border:2px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);cursor:pointer;transition:background .2s,border-color .2s,transform .15s;}
+.lang-picker-option:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3);transform:translateY(-1px);}
+.lang-picker-option.active-asl{border-color:rgba(0,245,206,.6);background:rgba(0,245,206,.1);}
+.lang-picker-option.active-lse{border-color:rgba(255,184,63,.6);background:rgba(255,184,63,.1);}
+body.light .lang-picker-option{border-color:rgba(0,0,0,.1);background:rgba(0,0,0,.04);color:#0d1422;}
+body.light .lang-picker-option:hover{background:rgba(0,0,0,.08);border-color:rgba(0,0,0,.22);}
+.lang-picker-flag{font-size:28px;line-height:1;}
+.lang-picker-info{flex:1;}
+.lang-picker-name{font-size:17px;font-weight:700;color:#fff;margin-bottom:2px;}
+.lang-picker-desc{font-size:13px;color:rgba(255,255,255,.55);font-weight:500;}
+body.light .lang-picker-name{color:#0d1422;}
+body.light .lang-picker-desc{color:rgba(0,0,0,.5);}
+.lang-picker-check{font-size:20px;flex-shrink:0;}
+.lang-picker-cancel{width:100%;padding:14px;border-radius:13px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;border:2px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:rgba(255,255,255,.8);transition:background .2s,border-color .2s;}
+.lang-picker-cancel:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.38);}
+body.light .lang-picker-cancel{border-color:rgba(0,0,0,.15);background:rgba(0,0,0,.05);color:rgba(0,0,0,.7);}
+body.light .lang-picker-cancel:hover{background:rgba(0,0,0,.1);border-color:rgba(0,0,0,.25);}
 .lang-btn{padding:8px 16px;border-radius:10px;border:2px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:rgba(255,255,255,.7);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:background .2s,border-color .2s,color .2s;}
 .lang-btn.active{background:rgba(0,245,206,.18);border-color:rgba(0,245,206,.6);color:#fff;}
 .lang-btn:hover:not(.active){background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.4);}
@@ -329,88 +446,63 @@ audio.result{width:100%;border-radius:8px;}
 
 @keyframes fup{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 
-/* ── LEARN VIEW ─────────────────────────────────────────────────────────────── */
-.learn-word-grid{display:flex;flex-wrap:wrap;gap:8px;padding:0 16px 4px;}
-.learn-word-btn{padding:10px 18px;border-radius:12px;border:2px solid rgba(255,200,80,.3);
-  background:rgba(255,200,80,.08);color:#ffc850;font-family:'DM Sans',sans-serif;
-  font-size:14px;font-weight:700;cursor:pointer;transition:background .2s,border-color .2s,transform .15s;}
-.learn-word-btn:hover{background:rgba(255,200,80,.18);border-color:rgba(255,200,80,.6);}
-.learn-word-btn.selected{background:rgba(255,200,80,.28);border-color:#ffc850;color:#fff;}
-.learn-step{margin:0 16px 12px;background:var(--surface);border:1px solid var(--border);
-  border-radius:18px;overflow:hidden;display:none;}
-.learn-step.active{display:block;}
-.learn-step-header{padding:12px 16px 8px;border-bottom:1px solid var(--border);
-  font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#ffc850;}
-.learn-attempt-ring{width:80px;height:80px;border-radius:50%;border:4px solid rgba(255,255,255,.12);
-  display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 8px;
-  transition:border-color .4s;}
-.learn-attempt-ring.pass{border-color:#00f5ce;}
-.learn-attempt-ring.fail{border-color:#ff7aaa;}
-.learn-conf-bar-track{height:10px;background:rgba(255,255,255,.1);border-radius:5px;margin:0 16px 6px;overflow:hidden;}
-.learn-conf-bar-fill{height:100%;border-radius:5px;width:0%;transition:width .5s ease,background .4s;}
-.learn-attempt-count{font-size:12px;color:rgba(255,255,255,.45);text-align:center;padding-bottom:8px;}
+  .nav-item[data-view="learn"].active .nav-icon{background:rgba(74,222,128,.15);box-shadow:0 4px 16px rgba(74,222,128,.25);}
+  .nav-item[data-view="learn"].active .nav-pip{background:#4ade80;}
+  .nav-item[data-view="feedback"].active .nav-icon{background:rgba(196,170,255,.15);box-shadow:0 4px 16px rgba(196,170,255,.25);}
+  .nav-item[data-view="feedback"].active .nav-pip{background:var(--violet);}
+  .nav-item[data-view="learn"].active .nav-pip{background:#4ade80;}
+  .learn-sign-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:0 16px 8px;}
+  .learn-sign-btn{background:var(--surface);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:14px 12px;text-align:left;cursor:pointer;transition:transform .18s,border-color .18s,box-shadow .18s;display:flex;flex-direction:column;gap:4px;width:100%;}
+  .learn-sign-btn:hover{transform:translateY(-2px);border-color:rgba(74,222,128,.4);box-shadow:0 6px 20px rgba(74,222,128,.1);}
+  .learn-sign-btn:active{transform:scale(.97);}
+  .learn-sign-name{font-size:15px;font-weight:700;color:#fff;text-transform:capitalize;}
+  .learn-sign-sub{font-size:11px;font-weight:600;color:rgba(255,255,255,.35);margin-top:2px;}
+  .learn-stage{padding:0 16px;}
+  .learn-clip-wrap{position:relative;border-radius:16px;overflow:hidden;background:#000;aspect-ratio:16/9;margin-bottom:12px;}
+  .learn-clip-wrap video{width:100%;height:100%;object-fit:contain;}
+  .learn-replay-btn{position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.55);border:none;border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;color:#fff;}
+  .learn-progress{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .learn-progress-bar{flex:1;height:6px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden;}
+  .learn-progress-fill{height:100%;background:#4ade80;border-radius:3px;transition:width .4s ease;}
+  .learn-progress-label{font-size:12px;font-weight:700;color:rgba(255,255,255,.5);white-space:nowrap;}
+  .learn-cam-wrap{position:relative;border-radius:16px;overflow:hidden;background:#111;aspect-ratio:4/3;margin-bottom:10px;}
+  .learn-cam-wrap video{width:100%;height:100%;object-fit:cover;}
+  .learn-result-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;opacity:0;pointer-events:none;transition:opacity .3s;background:rgba(0,0,0,.6);}
+  .learn-result-overlay.show{opacity:1;pointer-events:all;}
+  .learn-result-emoji{font-size:52px;line-height:1;}
+  .learn-result-label{font-size:18px;font-weight:700;color:#fff;}
+  .learn-result-conf{font-size:13px;color:rgba(255,255,255,.6);}
+  .learn-conf-bar-wrap{width:80%;height:8px;background:rgba(255,255,255,.15);border-radius:4px;overflow:hidden;}
+  .learn-conf-bar{height:100%;border-radius:4px;transition:width .5s ease;}
+  .badge-green{background:rgba(74,222,128,.12);border-color:rgba(74,222,128,.5);color:#4ade80;}
+  .learn-attempts{font-size:12px;color:rgba(255,255,255,.4);text-align:center;margin-top:4px;}
+  .learn-instruction{background:rgba(255,255,255,.05);border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:14px;color:rgba(255,255,255,.75);line-height:1.5;}
+  .learn-instruction strong{color:#fff;}
+  .learn-streak{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:700;color:#4ade80;}
 
-/* ── S2T FEEDBACK BUTTON + MODAL ──────────────────────────────────────────── */
-.s2t-fb-btn{
-  position:fixed;bottom:calc(var(--nav-h) + 72px);right:16px;z-index:250;
-  display:none;align-items:center;gap:8px;
-  background:linear-gradient(135deg,#c4aaff,#8c69ee);
-  color:#fff;border:none;border-radius:100px;
-  padding:12px 20px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;
-  cursor:pointer;box-shadow:0 4px 20px rgba(196,170,255,.4);
-  transition:transform .18s,box-shadow .18s;animation:fup .3s ease;}
-.s2t-fb-btn.show{display:flex;}
-.s2t-fb-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(196,170,255,.5);}
-.s2t-fb-btn:active{transform:scale(.97);}
 
-.fb-modal-backdrop{position:fixed;inset:0;z-index:510;
-  background:rgba(0,0,0,.7);backdrop-filter:blur(6px);
-  display:flex;align-items:flex-end;justify-content:center;
-  padding:0 0 calc(var(--nav-h) + 16px);
-  opacity:0;pointer-events:none;transition:opacity .28s ease;}
-.fb-modal-backdrop.show{opacity:1;pointer-events:all;}
-.fb-modal-sheet{background:#0f1827;border:1px solid rgba(255,255,255,.14);
-  border-radius:24px 24px 20px 20px;padding:24px 20px 20px;
-  width:100%;max-width:480px;
-  transform:translateY(32px);transition:transform .32s cubic-bezier(.22,1,.36,1);
-  box-shadow:0 -4px 40px rgba(0,0,0,.5);}
-.fb-modal-backdrop.show .fb-modal-sheet{transform:translateY(0);}
-.fb-modal-title{font-size:13px;font-weight:700;letter-spacing:.12em;
-  text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:8px;}
-.fb-modal-pred{font-size:28px;font-weight:700;color:var(--violet);
-  text-transform:capitalize;margin-bottom:4px;}
-.fb-modal-conf{font-size:13px;color:rgba(255,255,255,.4);margin-bottom:18px;}
-.fb-modal-q{font-size:16px;font-weight:600;color:#fff;margin-bottom:14px;}
-.fb-yes-btn{width:100%;padding:15px;border-radius:13px;border:none;
-  background:rgba(74,222,128,.15);border:1px solid rgba(74,222,128,.4);
-  color:#4ade80;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;
-  cursor:pointer;transition:background .15s;margin-bottom:8px;}
-.fb-yes-btn:hover{background:rgba(74,222,128,.25);}
-.fb-no-btn{width:100%;padding:15px;border-radius:13px;border:none;
-  background:rgba(255,122,170,.1);border:1px solid rgba(255,122,170,.3);
-  color:var(--rose);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;
-  cursor:pointer;transition:background .15s;margin-bottom:8px;}
-.fb-no-btn:hover{background:rgba(255,122,170,.2);}
-.fb-cancel-btn{width:100%;padding:12px;border-radius:13px;
-  border:1px solid rgba(255,255,255,.12);background:transparent;
-  color:rgba(255,255,255,.4);font-family:'DM Sans',sans-serif;font-size:14px;
-  font-weight:600;cursor:pointer;transition:background .15s;}
-.fb-cancel-btn:hover{background:rgba(255,255,255,.06);}
-.fb-correction-label{font-size:11px;font-weight:700;letter-spacing:.12em;
-  text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:10px;margin-top:4px;}
-.fb-correction-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;
-  max-height:200px;overflow-y:auto;margin-bottom:10px;}
-.fb-correction-btn{padding:10px 6px;background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.1);border-radius:8px;
-  color:rgba(255,255,255,.8);font-size:12px;font-weight:600;
-  cursor:pointer;text-align:center;text-transform:capitalize;
-  transition:background .15s,border-color .15s;}
-.fb-correction-btn:hover{background:rgba(255,122,170,.15);
-  border-color:rgba(255,122,170,.4);color:#fff;}
-.fb-done-msg{text-align:center;padding:8px 0 4px;
-  font-size:15px;font-weight:600;color:rgba(255,255,255,.7);}
-.fb-training-note{font-size:12px;color:rgba(255,255,255,.35);
-  text-align:center;margin-top:6px;}
+  /* ── AI FEEDBACK VIEW ── */
+  .fb-cam-wrap{position:relative;border-radius:16px;overflow:hidden;background:#111;aspect-ratio:4/3;margin-bottom:10px;}
+  .fb-cam-wrap video{width:100%;height:100%;object-fit:cover;}
+  .fb-result-card{background:var(--surface);border:1px solid rgba(196,170,255,.3);border-radius:18px;padding:20px;margin:0 16px 12px;}
+  .fb-pred-label{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:6px;}
+  .fb-pred-word{font-size:36px;font-weight:700;color:var(--violet);text-transform:capitalize;margin-bottom:4px;}
+  .fb-pred-conf{font-size:13px;color:rgba(255,255,255,.4);}
+  .fb-correction-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;max-height:220px;overflow-y:auto;margin-bottom:10px;}
+  .fb-correction-btn{background:rgba(196,170,255,.08);border:1px solid rgba(196,170,255,.25);border-radius:10px;padding:10px 6px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:#fff;cursor:pointer;transition:background .18s,border-color .18s;}
+  .fb-correction-btn:hover{background:rgba(196,170,255,.2);border-color:rgba(196,170,255,.6);}
+  .fb-done-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;text-align:center;margin:0 16px 12px;}
+  .fb-done-title{font-size:22px;font-weight:700;color:#fff;margin-bottom:6px;}
+  .fb-done-note{font-size:13px;color:rgba(255,255,255,.5);}
+  /* Floating feedback bar — ONLY shown inside feedback view */
+  .s2t-fb-btn{position:fixed;bottom:calc(var(--nav-h) + 10px);left:50%;transform:translateX(-50%);
+    z-index:350;background:linear-gradient(135deg,rgba(196,170,255,.22),rgba(196,170,255,.1));
+    border:1px solid rgba(196,170,255,.45);border-radius:100px;
+    padding:10px 22px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;
+    color:var(--violet);cursor:pointer;white-space:nowrap;
+    display:none;opacity:0;transition:opacity .25s;}
+  .s2t-fb-btn.show{display:block;opacity:1;}
+
 </style>
 </head>
 <body>
@@ -421,7 +513,16 @@ audio.result{width:100%;border-radius:8px;}
 
     <!-- HOME -->
     <div class="view active" id="view-home">
-      <div style="padding:40px 20px 16px;text-align:center;">
+      <div class="topbar" style="padding:12px 16px 4px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--teal);letter-spacing:-.02em;">SignFuture</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <button class="theme-toggle-btn" id="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme" title="Toggle light/dark">🌙</button>
+          <button class="theme-toggle-btn" id="lang-picker-btn" onclick="openLangPicker()" aria-label="Change sign language" title="Choose language" style="font-size:15px;font-weight:700;font-family:'DM Sans',sans-serif;">🌐</button>
+        </div>
+      </div>
+      <div style="padding:20px 20px 16px;text-align:center;">
         <div class="hero-eyebrow"><span class="eyebrow-dot"></span> Real-time translation</div>
         <div class="hero-title"><span style="color:var(--teal)">Sign</span><br>to the<br><span style="color:var(--amber)">Fu</span><span style="color:var(--violet)">tu</span><span style="color:var(--rose)">re</span></div>
         <p class="hero-sub" style="margin-top:14px;">Choose a translation mode to get started.</p>
@@ -432,12 +533,8 @@ audio.result{width:100%;border-radius:8px;}
         <div class="tool-card c-amber" onclick="nav('a2s')"><div class="card-icon c-amber">🎙️</div><div class="card-body"><div class="card-title">Audio → Sign</div><div class="card-desc">Speak into mic, see sign language video</div></div><span class="card-chevron">›</span></div>
         <div class="tool-card c-violet" onclick="nav('t2s')"><div class="card-icon c-violet">✍️</div><div class="card-body"><div class="card-title">Text → Sign</div><div class="card-desc">Type a message, watch it get signed</div></div><span class="card-chevron">›</span></div>
         <div class="tool-card c-rose" onclick="nav('s2t')"><div class="card-icon c-rose">📝</div><div class="card-body"><div class="card-title">Sign → Text</div><div class="card-desc">Sign on camera, receive a transcription</div></div><span class="card-chevron">›</span></div>
-        <div class="tool-card" style="border-color:rgba(255,200,80,.2);background:var(--surface);" onclick="nav('learn')"><div class="card-icon" style="background:rgba(255,200,80,.12);border-color:rgba(255,200,80,.35);font-size:24px;">🎓</div><div class="card-body"><div class="card-title" style="color:#ffc850;">Learn to Sign</div><div class="card-desc">AI teaches you a word — step by step</div></div><span class="card-chevron" style="color:rgba(255,200,80,.6);">›</span></div>
-        <div class="tool-card" style="border-color:rgba(196,170,255,.2);background:var(--surface);" onclick="nav('feedback');fbViewInit()">
-  <div class="card-icon" style="background:rgba(196,170,255,.12);border-color:rgba(196,170,255,.35);font-size:24px;">✦</div>
-  <div class="card-body"><div class="card-title" style="color:var(--violet);">AI Feedback</div><div class="card-desc">Correct predictions to improve the model</div></div>
-  <span class="card-chevron" style="color:rgba(196,170,255,.6);">›</span>
-</div>
+        <div class="tool-card" onclick="nav('learn')" style="border-color:rgba(74,222,128,.2);"><div class="card-icon" style="background:rgba(74,222,128,.12);color:#4ade80;">🎓</div><div class="card-body"><div class="card-title">Learn Sign Language</div><div class="card-desc">Practise signs with AI feedback</div></div><span class="card-chevron" style="color:#4ade80;">›</span></div>
+        <div class="tool-card" onclick="nav('feedback')" style="border-color:rgba(196,170,255,.2);"><div class="card-icon" style="background:rgba(196,170,255,.12);border-color:rgba(196,170,255,.35);color:var(--violet);">✦</div><div class="card-body"><div class="card-title">AI Feedback</div><div class="card-desc">Record a sign — AI guesses, you train it</div></div><span class="card-chevron" style="color:rgba(196,170,255,.6);">›</span></div>
       </div>
       <div style="padding:14px 16px 6px;">
         <button class="home-settings-btn" onclick="nav('settings')">
@@ -547,6 +644,81 @@ audio.result{width:100%;border-radius:8px;}
       <div class="btn-stack">
         <button class="btn btn-rose" id="s2t-start" onclick="s2tStart()">▶ Start Recording</button>
         <button class="btn btn-stop" id="s2t-stop" onclick="s2tStop()" disabled>⏹ Stop &amp; Send</button>
+      </div>
+    </div>
+
+
+    <!-- LEARN MODE -->
+    <div class="view" id="view-learn">
+      <div class="topbar"><button class="back-btn" onclick="learnBack()">← Home</button><span class="page-badge badge-green">🎓 Learn</span></div>
+
+      <!-- PICK SCREEN -->
+      <div id="learn-pick">
+        <div class="tool-header">
+          <div class="tool-title"><span style="color:#4ade80">Learn</span> Sign Language</div>
+          <div class="tool-sub">Pick a sign to practise. The AI will watch you and score your attempt.</div>
+        </div>
+        <div id="learn-no-model" style="display:none;padding:0 16px 12px;">
+          <div style="background:rgba(255,184,63,.08);border:1px solid rgba(255,184,63,.3);border-radius:12px;padding:14px;font-size:14px;color:rgba(255,255,255,.75);line-height:1.5;">
+            ⚠️ <strong style="color:#ffb83f;">Model not trained yet.</strong> Go to Dev Panel → Train tab to record signs and train the AI first.
+          </div>
+        </div>
+        <div class="learn-sign-grid" id="learn-sign-grid"></div>
+      </div>
+
+      <!-- PRACTISE SCREEN (hidden until sign chosen) -->
+      <div id="learn-practise" style="display:none;">
+        <!-- progress bar -->
+        <div class="learn-stage">
+          <div class="learn-progress">
+            <div class="learn-progress-bar"><div class="learn-progress-fill" id="learn-prog-fill" style="width:0%"></div></div>
+            <span class="learn-progress-label" id="learn-prog-label">0 / 0</span>
+            <span class="learn-streak" id="learn-streak" style="display:none">🔥 <span id="learn-streak-n">0</span></span>
+          </div>
+
+          <!-- Sign demo clip -->
+          <p style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.4);margin:0 0 8px;">Watch the sign</p>
+          <div class="learn-clip-wrap">
+            <video id="learn-demo-vid" playsinline muted autoplay></video>
+            <button class="learn-replay-btn" onclick="learnReplayDemo()" title="Replay">↺</button>
+          </div>
+
+          <div class="learn-instruction">
+            Now copy the sign for <strong id="learn-sign-label">—</strong>. Hold it clearly for 2–3 seconds, then press <strong>Stop</strong>.
+          </div>
+
+          <!-- Camera + result overlay -->
+          <p style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.4);margin:0 0 8px;">Your attempt</p>
+          <div class="learn-cam-wrap">
+            <video id="learn-cam-vid" autoplay muted playsinline></video>
+            <div class="rec-pill" id="learn-rec-pill"><span class="rec-dot"></span> REC</div>
+            <div class="learn-result-overlay" id="learn-result-overlay">
+              <div class="learn-result-emoji" id="learn-result-emoji"></div>
+              <div class="learn-result-label" id="learn-result-label"></div>
+              <div class="learn-result-conf" id="learn-result-conf"></div>
+              <div class="learn-conf-bar-wrap"><div class="learn-conf-bar" id="learn-conf-bar"></div></div>
+            </div>
+          </div>
+          <div class="learn-attempts" id="learn-attempts"></div>
+
+          <div class="status-strip" id="learn-status">Press Start to begin recording.</div>
+          <div class="btn-stack">
+            <button class="btn" id="learn-start-btn" onclick="learnStartRec()"
+              style="background:rgba(74,222,128,.15);border:1px solid rgba(74,222,128,.4);color:#4ade80;">▶ Start Recording</button>
+            <button class="btn btn-stop" id="learn-stop-btn" onclick="learnStopRec()" disabled>⏹ Stop &amp; Check</button>
+            <button class="btn" id="learn-skip-btn" onclick="learnSkip()"
+              style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);font-size:13px;">Skip this sign →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- COMPLETE SCREEN -->
+      <div id="learn-complete" style="display:none;padding:32px 16px;text-align:center;">
+        <div style="font-size:64px;margin-bottom:16px;">🎉</div>
+        <div style="font-size:24px;font-weight:700;color:#fff;margin-bottom:8px;">Session Complete!</div>
+        <div style="font-size:15px;color:rgba(255,255,255,.6);margin-bottom:28px;" id="learn-complete-msg"></div>
+        <button class="btn" onclick="learnRestart()"
+          style="background:rgba(74,222,128,.15);border:1px solid rgba(74,222,128,.4);color:#4ade80;width:100%;">🎓 Learn More Signs</button>
       </div>
     </div>
 
@@ -672,118 +844,68 @@ audio.result{width:100%;border-radius:8px;}
       <div style="height:20px;"></div>
     </div>
 
-  
-    <!-- LEARN TO SIGN -->
-    <div class="view" id="view-learn">
-      <div class="topbar"><button class="back-btn" onclick="learnExit()">← Home</button><span class="page-badge" style="color:#ffc850;border-color:rgba(255,200,80,.6);background:rgba(255,200,80,.15);">🎓 Learn</span></div>
+
+    <!-- AI FEEDBACK VIEW -->
+    <div class="view" id="view-feedback">
+      <div class="topbar"><button class="back-btn" onclick="nav('home')">← Home</button><span class="page-badge badge-violet">✦ AI Feedback</span></div>
       <div class="tool-header">
-        <div class="tool-title"><span style="color:#ffc850;">Learn</span> to Sign</div>
-        <div class="tool-sub">Pick a word — the AI will teach you how to sign it.</div>
+        <div class="tool-title"><span style="color:var(--violet)">AI</span> Feedback</div>
+        <div class="tool-sub">Record a sign — the AI guesses, then you confirm or correct it to train the model.</div>
       </div>
 
-      <!-- Step 0: word picker -->
-      <div class="learn-step active" id="learn-step-pick">
-        <div class="learn-step-header">Choose a word to learn</div>
-        <div style="padding:14px 0 10px;">
-          <div class="learn-word-grid" id="learn-word-grid">
-            <div style="padding:0 16px;color:rgba(255,255,255,.4);font-size:13px;">Loading words…</div>
+      <!-- RECORD SCREEN -->
+      <div id="fb-record-screen">
+        <div class="panel camera-panel" style="margin:0 16px 12px;">
+          <div class="panel-label">Camera</div>
+          <div class="fb-cam-wrap">
+            <video id="fb-vid" autoplay muted playsinline></video>
+            <div class="rec-pill" id="fb-rec-pill"><span class="rec-dot"></span> REC</div>
           </div>
         </div>
-        <div style="padding:0 16px 16px;">
-          <button class="btn" style="background:linear-gradient(135deg,#ffc850,#e09a20);color:#1a0f00;box-shadow:0 4px 20px rgba(255,200,80,.25);" id="learn-start-btn" onclick="learnStart()" disabled>▶ Start Learning</button>
+        <div class="status-strip" id="fb-status">Press Start to record your sign.</div>
+        <div class="btn-stack">
+          <button class="btn btn-violet" id="fb-start-btn" onclick="fbStart()">▶ Start Recording</button>
+          <button class="btn btn-stop" id="fb-stop-btn" onclick="fbStop()" disabled>⏹ Stop &amp; Analyse</button>
         </div>
       </div>
 
-      <!-- Step 1: watch the sign -->
-      <div class="learn-step" id="learn-step-watch">
-        <div class="learn-step-header">Step 1 — Watch the sign</div>
-        <div style="aspect-ratio:16/9;position:relative;overflow:hidden;background:#000;">
-          <video id="learn-demo-vid" playsinline style="width:100%;height:100%;object-fit:contain;"></video>
+      <!-- RESULT SCREEN (hidden until AI guesses) -->
+      <div id="fb-result-screen" style="display:none;">
+        <div class="fb-result-card">
+          <div class="fb-pred-label">AI recognised</div>
+          <div class="fb-pred-word" id="fb-pred-word">—</div>
+          <div class="fb-pred-conf" id="fb-pred-conf"></div>
         </div>
-        <div style="padding:14px 16px 6px;font-size:15px;font-weight:700;color:#fff;text-align:center;" id="learn-watch-label">—</div>
-        <div style="padding:0 16px 16px;">
-          <button class="btn" style="background:linear-gradient(135deg,#ffc850,#e09a20);color:#1a0f00;" id="learn-watched-btn" onclick="learnGoRecord()" disabled>I watched it — let me try ▶</button>
+        <div style="margin:0 16px 10px;font-size:16px;font-weight:600;color:#fff;">Was the AI correct?</div>
+        <div style="padding:0 16px;display:flex;flex-direction:column;gap:8px;" id="fb-yn-area">
+          <button class="btn" style="background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.35);color:#4ade80;" onclick="fbConfirmYes()">✓ Yes — correct</button>
+          <button class="btn btn-stop" onclick="fbShowCorrection()">✗ No — select the right sign</button>
+          <button class="btn" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);font-size:13px;" onclick="fbRecordAgain()">↺ Record again</button>
         </div>
-      </div>
-
-      <!-- Step 2: try it -->
-      <div class="learn-step" id="learn-step-try">
-        <div class="learn-step-header">Step 2 — Now you try</div>
-        <div class="panel camera-panel" style="margin:0;border-radius:0;border:none;">
-          <video id="learn-cam-vid" autoplay muted playsinline></video>
-          <div class="rec-pill" id="learn-rec-pill"><span class="rec-dot"></span> REC</div>
-        </div>
-        <div class="status-strip" style="margin:8px 16px;" id="learn-try-status">Press Start when ready.</div>
-        <div style="padding:0 16px 16px;display:flex;gap:8px;">
-          <button class="btn" style="background:linear-gradient(135deg,#ffc850,#e09a20);color:#1a0f00;flex:1;" id="learn-rec-start" onclick="learnRecStart()">▶ Start</button>
-          <button class="btn btn-stop" id="learn-rec-stop" onclick="learnRecStop()" disabled style="flex:1;">⏹ Stop &amp; Check</button>
+        <!-- Correction grid -->
+        <div id="fb-correction-area" style="display:none;padding:0 16px;">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:10px;">Select the correct sign</div>
+          <div class="fb-correction-grid" id="fb-correction-grid"></div>
+          <button class="btn btn-stop" style="margin-bottom:8px;" onclick="fbHideCorrection()">← Back</button>
         </div>
       </div>
 
-      <!-- Step 3: result -->
-      <div class="learn-step" id="learn-step-result">
-        <div class="learn-step-header">Result</div>
-        <div style="padding:20px 16px 8px;text-align:center;">
-          <div class="learn-attempt-ring" id="learn-result-ring">❓</div>
-          <div style="font-size:20px;font-weight:700;color:#fff;margin-bottom:4px;" id="learn-result-title">—</div>
-          <div style="font-size:14px;color:rgba(255,255,255,.6);" id="learn-result-sub">—</div>
+      <!-- DONE SCREEN (hidden until feedback sent) -->
+      <div id="fb-done-screen" style="display:none;">
+        <div class="fb-done-card">
+          <div style="font-size:40px;margin-bottom:12px;" id="fb-done-icon">✅</div>
+          <div class="fb-done-title" id="fb-done-title">Saved!</div>
+          <div class="fb-done-note" id="fb-done-note">Model is retraining in background</div>
         </div>
-        <div class="learn-conf-bar-track"><div class="learn-conf-bar-fill" id="learn-conf-bar"></div></div>
-        <div style="font-size:12px;color:rgba(255,255,255,.45);text-align:center;padding-bottom:4px;" id="learn-conf-label">—</div>
-        <div class="learn-attempt-count" id="learn-attempt-count"></div>
-        <div style="padding:0 16px 16px;display:flex;gap:8px;" id="learn-result-btns">
-          <button class="btn btn-stop" style="flex:1;" id="learn-retry-btn" onclick="learnGoRecord()">↻ Try Again</button>
-          <button class="btn" style="background:linear-gradient(135deg,#ffc850,#e09a20);color:#1a0f00;flex:1;" id="learn-next-btn" onclick="learnPickNew()">Next word ▶</button>
+        <div style="padding:0 16px 20px;">
+          <button class="btn btn-violet" onclick="fbRecordAgain()">↺ Record Another Sign</button>
         </div>
       </div>
 
+      <div style="height:20px;"></div>
     </div>
 
-
-<!-- FEEDBACK VIEW -->
-<div class="view" id="view-feedback">
-  <div class="topbar"><button class="back-btn" onclick="nav('home')">← Home</button><span class="page-badge badge-violet">✦ Feedback</span></div>
-  <div class="tool-header"><div class="tool-title"><span style="color:var(--violet);">AI</span> Feedback</div><div class="tool-sub">Review the last prediction and help the model improve.</div></div>
-
-  <div id="fb-view-idle" style="margin:0 16px;">
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:28px 22px;text-align:center;">
-      <div style="font-size:40px;margin-bottom:14px;">🤟</div>
-      <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#fff;margin-bottom:8px;">No prediction yet</div>
-      <div style="font-size:14px;color:rgba(255,255,255,.6);line-height:1.6;margin-bottom:20px;">Use <strong style="color:#fff;">Sign → Text</strong> first, then come back here to confirm or correct what the AI recognised.</div>
-      <button class="btn btn-rose" style="max-width:260px;margin:0 auto;" onclick="nav('s2t')">▶ Go to Sign → Text</button>
-    </div>
-  </div>
-
-  <div id="fb-view-ready" style="display:none;">
-    <div style="margin:0 16px 12px;background:var(--surface);border:1px solid rgba(196,170,255,.3);border-radius:18px;padding:20px 20px 16px;">
-      <div style="font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:6px;">Last prediction</div>
-      <div style="font-size:32px;font-weight:700;color:var(--violet);text-transform:capitalize;margin-bottom:4px;" id="fbv-pred">—</div>
-      <div style="font-size:13px;color:rgba(255,255,255,.4);" id="fbv-conf"></div>
-    </div>
-    <div style="margin:0 16px 10px;font-size:16px;font-weight:600;color:#fff;">Was the AI correct?</div>
-    <div style="padding:0 16px;display:flex;flex-direction:column;gap:8px;" id="fbv-yn">
-      <button class="btn" style="background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.35);color:#4ade80;" onclick="fbViewYes()">✓ Yes — it was correct</button>
-      <button class="btn btn-stop" onclick="fbViewShowCorrection()">✗ No — show correction grid</button>
-    </div>
-    <div id="fbv-correction" style="display:none;padding:0 16px;">
-      <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:10px;">Select the correct sign</div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;max-height:220px;overflow-y:auto;margin-bottom:10px;" id="fbv-grid"></div>
-      <button class="btn btn-stop" style="margin-bottom:8px;" onclick="fbViewHideCorrection()">← Back</button>
-    </div>
-    <div id="fbv-done" style="display:none;margin:0 16px;">
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;text-align:center;">
-        <div style="font-size:22px;font-weight:700;color:#fff;margin-bottom:6px;" id="fbv-done-msg">—</div>
-        <div style="font-size:13px;color:rgba(255,255,255,.5);" id="fbv-done-note"></div>
-      </div>
-      <div style="padding:12px 0 0;">
-        <button class="btn btn-rose" onclick="nav('s2t')">▶ Try another sign</button>
-      </div>
-    </div>
-  </div>
-  <div style="height:20px;"></div>
-</div>
-
-</div><!-- /views -->
+  </div><!-- /views -->
 
   <nav class="bottom-nav">
     <button class="nav-item active" data-view="home"     onclick="nav('home')"    ><span class="nav-icon">🏠</span><span class="nav-label">Home</span><span class="nav-pip"></span></button>
@@ -791,8 +913,8 @@ audio.result{width:100%;border-radius:8px;}
     <button class="nav-item"        data-view="a2s"      onclick="nav('a2s')"     ><span class="nav-icon">🎙️</span><span class="nav-label">Audio→Sign</span><span class="nav-pip"></span></button>
     <button class="nav-item"        data-view="t2s"      onclick="nav('t2s')"     ><span class="nav-icon">✍️</span><span class="nav-label">Text→Sign</span><span class="nav-pip"></span></button>
     <button class="nav-item"        data-view="s2t"      onclick="nav('s2t')"     ><span class="nav-icon">📝</span><span class="nav-label">Sign→Text</span><span class="nav-pip"></span></button>
-    <button class="nav-item"        data-view="learn"    onclick="nav('learn');learnInit()"   ><span class="nav-icon">🎓</span><span class="nav-label">Learn</span><span class="nav-pip"></span></button>
-    <button class="nav-item" data-view="feedback" onclick="nav('feedback');fbViewInit()"><span class="nav-icon">✦</span><span class="nav-label">Feedback</span><span class="nav-pip"></span></button>
+    <button class="nav-item"        data-view="learn"    onclick="nav('learn')"   ><span class="nav-icon">🎓</span><span class="nav-label">Learn</span><span class="nav-pip"></span></button>
+    <button class="nav-item"        data-view="feedback" onclick="nav('feedback')" ><span class="nav-icon">✦</span><span class="nav-label">Feedback</span><span class="nav-pip"></span></button>
     <button class="nav-item"        data-view="settings" onclick="nav('settings')"><span class="nav-icon">⚙️</span><span class="nav-label">Settings</span><span class="nav-pip"></span></button>
   </nav>
 
@@ -998,46 +1120,6 @@ audio.result{width:100%;border-radius:8px;}
 </div>
 
 
-
-  <!-- FLOATING FEEDBACK BUTTON — appears after every Sign→Text prediction -->
-  <button class="s2t-fb-btn" id="s2t-fb-btn" onclick="fbModalOpen()">
-    ✦ Was this correct?
-  </button>
-
-  <!-- FEEDBACK MODAL -->
-  <div class="fb-modal-backdrop" id="fb-modal" onclick="fbModalBgClick(event)">
-    <div class="fb-modal-sheet">
-      <div class="fb-modal-title">AI Prediction</div>
-      <div class="fb-modal-pred" id="fb-modal-pred">—</div>
-      <div class="fb-modal-conf" id="fb-modal-conf"></div>
-      <div class="fb-modal-q">Was the AI correct?</div>
-
-      <!-- Yes / No buttons -->
-      <div id="fb-yn-btns">
-        <button class="fb-yes-btn" onclick="fbSubmitYes()">
-          ✓ Yes — train 1x on this sign
-        </button>
-        <button class="fb-no-btn" onclick="fbShowCorrection()">
-          ✗ No — show correction grid (trains 10x)
-        </button>
-        <button class="fb-cancel-btn" onclick="fbModalClose()">Cancel</button>
-      </div>
-
-      <!-- Correction grid (shown after No) -->
-      <div id="fb-correction-area" style="display:none;">
-        <div class="fb-correction-label">Select the correct sign</div>
-        <div class="fb-correction-grid" id="fb-correction-grid"></div>
-        <button class="fb-cancel-btn" onclick="fbHideCorrection()">← Back</button>
-      </div>
-
-      <!-- Done message -->
-      <div id="fb-done-area" style="display:none;">
-        <div class="fb-done-msg" id="fb-done-msg"></div>
-        <div class="fb-training-note" id="fb-training-note"></div>
-      </div>
-    </div>
-  </div>
-
   <!-- LANGUAGE SWITCHING OVERLAY -->
   <div class="lang-switching" id="lang-switching">
     <div class="lang-switching-spinner"></div>
@@ -1080,6 +1162,8 @@ function nav(id) {
   next.classList.add('active'); next.scrollTop = 0;
   document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.view === id));
   current = id;
+  if (id === 'learn') learnInit();
+  if (id === 'feedback') { fbRecordAgain(); fetch('/health').then(r=>r.json()).then(d=>{ fbLabels=(d.model_labels||[]).sort(); }).catch(()=>{}); }
 }
 
 // ═══════════════════════════════
@@ -1123,9 +1207,138 @@ const LANG_META = {
 };
 
 // ── Visual sync: update every UI element that reflects active lang ─────────────
+// ── Full bilingual string table ───────────────────────────────────────────────
+const UI_STRINGS = {
+  en: {
+    heroEyebrow:'Real-time translation', heroSub:'Choose a translation mode to get started.',
+    homeTip:'Use the tab bar below to switch tools instantly',
+    cardS2ATitle:'Sign → Audio',   cardS2ADesc:'Record signing, receive spoken audio',
+    cardA2STitle:'Audio → Sign',   cardA2SDesc:'Speak into mic, see sign language video',
+    cardT2STitle:'Text → Sign',    cardT2SDesc:'Type a message, watch it get signed',
+    cardS2TTitle:'Sign → Text',    cardS2TDesc:'Sign on camera, receive a transcription',
+    cardLearnTitle:'Learn Sign Language', cardLearnDesc:'Practise signs with AI feedback',
+    cardFBTitle:'AI Feedback',     cardFBDesc:'Record a sign — AI guesses, you train it',
+    settingsBtnTitle:'Settings',   settingsBtnSub:'Language · Font size · Volume · Mic test',
+    s2aTitle:'Sign to Audio', s2aSub:'Record your signing — hear the words spoken back.',
+    s2aStart:'▶ Start Recording',  s2aStop:'⏹ Stop & Send', s2aStatus:'Press Start to begin.',
+    s2aAudioLbl:'▶ Translated Audio',
+    a2sTitle:'Audio to Sign', a2sSub:'Speak — the browser recognises your words and shows the sign.',
+    a2sStart:'▶ Start Listening',  a2sStop:'⏹ Stop',
+    a2sStatus:'Press Start — speak clearly in English.',
+    a2sWaveLbl:'Microphone inactive', a2sHeardLbl:'Heard',
+    a2sOutputLbl:'Sign Language Output', a2sPh:'Video will appear here',
+    t2sTitle:'Text to Sign', t2sSub:'Type anything — watch it get signed.',
+    t2sPlaceholder:'Type something here… e.g. hello, thank you, how are you',
+    t2sOutputLbl:'Sign Language Output', t2sPh:'Video will appear here',
+    t2sBtn:'✨ Convert to Sign Language', t2sStatus:'Enter text and press Convert.',
+    t2sMsgLbl:'Your message',
+    s2tTitle:'Sign to Text', s2tSub:'Sign on camera — receive a written transcription.',
+    s2tTransLbl:'Transcription', s2tClearBtn:'Clear ✕',
+    s2tPh:'Your transcription will appear here…',
+    s2tStart:'▶ Start Recording', s2tStop:'⏹ Stop & Send', s2tStatus:'Press Start to begin.',
+    fbTitle:'AI Feedback', fbSub:'Record a sign — the AI guesses, then you confirm or correct it to train the model.',
+    fbStart:'▶ Start Recording', fbStop:'⏹ Stop & Analyse', fbStatus:'Press Start to record your sign.',
+    fbYes:'✓ Yes — correct', fbNo:'✗ No — select the right sign', fbAgain:'↺ Record again',
+    fbCorrectLbl:'Select the correct sign', fbBack:'← Back',
+    fbPredLbl:'AI recognised', fbDoneNote:'Model is retraining in background',
+    fbRecordAnother:'↺ Record Another Sign',
+    learnTitle:'Learn Sign Language', learnSub:'Pick a sign to practise. The AI will watch you and score your attempt.',
+    learnNoModel:'⚠️ Model not trained yet. Go to Dev Panel → Train tab to record signs and train the AI first.',
+    learnInstruction:'Now copy the sign for [SIGN]. Hold it clearly for 2–3 seconds, then press Stop.',
+    learnStart:'▶ Start Recording', learnStop:'⏹ Stop & Check', learnSkip:'Skip this sign →',
+    learnStatus:'Press Start to begin recording.',
+    learnMore:'🎓 Learn More Signs',
+    learnWatchLbl:'Watch the sign', learnAttemptLbl:'Your attempt',
+    settingsTitle:'Settings', settingsSub:'Personalise the app to suit your needs.',
+    fontPreviewLabel:'Text size preview',
+    fontPreviewText:'The quick brown fox jumps over the lazy dog. Record signing, receive audio.',
+    fontSizeLabel:'Font Size', fontSizeDesc:'Makes all text bigger or smaller',
+    volLabel:'Playback Volume', volDesc:'How loud the translated audio plays',
+    micLabel:'Mic Sensitivity', micDesc:'How strongly the waveform reacts',
+    langLabel:'Language & AI Model',
+    langDesc:'Switches translation language and loads the matching AI model on the server',
+    resetLabel:'Reset to Defaults', resetDesc:'Restore all settings to original values',
+    resetBtn:'Reset',
+    creditsLabel:'Credits', creditsDesc:'The team and tech behind SignFuture',
+    micTestTitle:'Test Your Microphone',
+    micTestDesc:'Press <strong style="color:#fff;">Start Test</strong>, speak normally and watch the level bar.',
+    micTestStart:'🎙️ Start Test', micTestStop:'⏹ Stop',
+    micTestStatus:'Ready — press Start Test to begin',
+    micSpeechPh:'Your words will appear here as you speak…',
+    micLevelLbl:'📶 Input Level', micWaveLbl:'〰️ Waveform',
+    micHearLbl:'💬 What I hear you saying', micHint:'Start the test to see levels',
+    backHome:'← Home', backSettings:'← Settings',
+    a2sInputStatus:'Press Start — speak clearly in English.',
+  },
+  es: {
+    heroEyebrow:'Traducción en tiempo real', heroSub:'Elige un modo de traducción para empezar.',
+    homeTip:'Usa la barra inferior para cambiar de herramienta',
+    cardS2ATitle:'Seña → Audio',   cardS2ADesc:'Graba tus señas y recibe audio hablado',
+    cardA2STitle:'Audio → Seña',   cardA2SDesc:'Habla al micrófono y ve la seña correspondiente',
+    cardT2STitle:'Texto → Seña',   cardT2SDesc:'Escribe un mensaje y mira cómo se signa',
+    cardS2TTitle:'Seña → Texto',   cardS2TDesc:'Signa frente a la cámara y recibe una transcripción',
+    cardLearnTitle:'Aprender LSE', cardLearnDesc:'Practica señas con retroalimentación de la IA',
+    cardFBTitle:'Retroalimentación', cardFBDesc:'Graba una seña — la IA adivina, tú la entrenas',
+    settingsBtnTitle:'Ajustes',    settingsBtnSub:'Idioma · Tamaño · Volumen · Prueba de micrófono',
+    s2aTitle:'Seña a Audio', s2aSub:'Graba tus señas — escucha las palabras en voz alta.',
+    s2aStart:'▶ Iniciar grabación', s2aStop:'⏹ Detener y enviar', s2aStatus:'Pulsa Iniciar para comenzar.',
+    s2aAudioLbl:'▶ Audio traducido',
+    a2sTitle:'Audio a Seña', a2sSub:'Habla — el navegador reconoce tus palabras y muestra la seña.',
+    a2sStart:'▶ Iniciar escucha', a2sStop:'⏹ Detener',
+    a2sStatus:'Pulsa Iniciar — habla claramente en español.',
+    a2sWaveLbl:'Micrófono inactivo', a2sHeardLbl:'Escuchado',
+    a2sOutputLbl:'Seña en LSE', a2sPh:'El vídeo aparecerá aquí',
+    t2sTitle:'Texto a Seña', t2sSub:'Escribe cualquier cosa — mírala signada.',
+    t2sPlaceholder:'Escribe algo aquí… ej: hola, gracias, cómo estás',
+    t2sOutputLbl:'Seña en LSE', t2sPh:'El vídeo aparecerá aquí',
+    t2sBtn:'✨ Convertir a lengua de signos', t2sStatus:'Escribe texto y pulsa Convertir.',
+    t2sMsgLbl:'Tu mensaje',
+    s2tTitle:'Seña a Texto', s2tSub:'Signa frente a la cámara — recibe una transcripción.',
+    s2tTransLbl:'Transcripción', s2tClearBtn:'Borrar ✕',
+    s2tPh:'Tu transcripción aparecerá aquí…',
+    s2tStart:'▶ Iniciar grabación', s2tStop:'⏹ Detener y enviar', s2tStatus:'Pulsa Iniciar para comenzar.',
+    fbTitle:'Retroalimentación IA', fbSub:'Graba una seña — la IA adivina, luego confirma o corrige para entrenarla.',
+    fbStart:'▶ Iniciar grabación', fbStop:'⏹ Detener y analizar', fbStatus:'Pulsa Iniciar para grabar tu seña.',
+    fbYes:'✓ Sí — correcto', fbNo:'✗ No — selecciona la seña correcta', fbAgain:'↺ Grabar de nuevo',
+    fbCorrectLbl:'Selecciona la seña correcta', fbBack:'← Volver',
+    fbPredLbl:'La IA reconoció', fbDoneNote:'El modelo está reentrenando en segundo plano',
+    fbRecordAnother:'↺ Grabar otra seña',
+    learnTitle:'Aprender LSE', learnSub:'Elige una seña para practicar. La IA te verá y puntuará tu intento.',
+    learnNoModel:'⚠️ Modelo no entrenado. Ve al Panel de Desarrollo → pestaña Entrenar para grabar señas y entrenar la IA.',
+    learnInstruction:'Ahora copia la seña para [SIGN]. Mantenla claramente 2–3 segundos y pulsa Detener.',
+    learnStart:'▶ Iniciar grabación', learnStop:'⏹ Detener y comprobar', learnSkip:'Saltar esta seña →',
+    learnStatus:'Pulsa Iniciar para comenzar a grabar.',
+    learnMore:'🎓 Aprender más señas',
+    learnWatchLbl:'Mira la seña', learnAttemptLbl:'Tu intento',
+    settingsTitle:'Ajustes', settingsSub:'Personaliza la app según tus preferencias.',
+    fontPreviewLabel:'Vista previa del tamaño',
+    fontPreviewText:'El veloz murciélago hindú comía feliz cardillo y kiwi. Graba señas, recibe audio.',
+    fontSizeLabel:'Tamaño de fuente', fontSizeDesc:'Hace el texto más grande o más pequeño',
+    volLabel:'Volumen de reproducción', volDesc:'Qué tan alto suena el audio traducido',
+    micLabel:'Sensibilidad del micrófono', micDesc:'Qué tan fuerte reacciona la forma de onda',
+    langLabel:'Idioma y modelo de IA',
+    langDesc:'Cambia el idioma de traducción y carga el modelo de IA correspondiente en el servidor',
+    resetLabel:'Restablecer valores', resetDesc:'Restaurar todos los ajustes originales',
+    resetBtn:'Restablecer',
+    creditsLabel:'Créditos', creditsDesc:'El equipo y la tecnología detrás de SignFuture',
+    micTestTitle:'Probar el micrófono',
+    micTestDesc:'Pulsa <strong style="color:#fff;">Iniciar prueba</strong>, habla con normalidad y observa la barra de nivel.',
+    micTestStart:'🎙️ Iniciar prueba', micTestStop:'⏹ Detener',
+    micTestStatus:'Listo — pulsa Iniciar prueba para empezar',
+    micSpeechPh:'Tus palabras aparecerán aquí mientras hablas…',
+    micLevelLbl:'📶 Nivel de entrada', micWaveLbl:'〰️ Forma de onda',
+    micHearLbl:'💬 Lo que escucho que dices', micHint:'Inicia la prueba para ver los niveles',
+    backHome:'← Inicio', backSettings:'← Ajustes',
+    a2sInputStatus:'Pulsa Iniciar — habla claramente en español.',
+  }
+};
+
 function _applyLangUI(lang) {
   const m = LANG_META[lang];
   if (!m) return;
+  const s = UI_STRINGS[lang === 'lse' ? 'es' : 'en'];
+  const isEs = lang === 'lse';
+  document.documentElement.lang = isEs ? 'es' : 'en';
 
   // Settings toggle buttons
   document.getElementById('lang-en').classList.toggle('active', lang === 'asl');
@@ -1139,38 +1352,173 @@ function _applyLangUI(lang) {
     document.getElementById('active-lang-text').textContent = m.label;
   }
 
-  // Speech recognition language
-  if (window.a2sRecog) {
-    a2sRecog.lang = m.sr;
+  if (window.a2sRecog) a2sRecog.lang = m.sr;
+
+  const T = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+  const P = (id, v) => { const e = document.getElementById(id); if (e) e.placeholder = v; };
+
+  // Hero
+  const eyebrow = document.querySelector('.hero-eyebrow');
+  if (eyebrow) eyebrow.innerHTML = '<span class="eyebrow-dot"></span> ' + s.heroEyebrow;
+  const heroSub = document.querySelector('.hero-sub');
+  if (heroSub) heroSub.textContent = s.heroSub;
+  const homeTipEl = document.querySelector('#view-home > p:last-of-type');
+  if (homeTipEl) homeTipEl.textContent = s.homeTip;
+
+  // Home tool cards — map by current text
+  document.querySelectorAll('.tool-card').forEach(card => {
+    const t = card.querySelector('.card-title');
+    const d = card.querySelector('.card-desc');
+    if (!t || !d) return;
+    const key = t.textContent.trim().replace(/\s+/g,' ');
+    const map = {
+      'Sign → Audio':[s.cardS2ATitle,s.cardS2ADesc],'Seña → Audio':[s.cardS2ATitle,s.cardS2ADesc],
+      'Audio → Sign':[s.cardA2STitle,s.cardA2SDesc],'Audio → Seña':[s.cardA2STitle,s.cardA2SDesc],
+      'Text → Sign':[s.cardT2STitle,s.cardT2SDesc],'Texto → Seña':[s.cardT2STitle,s.cardT2SDesc],
+      'Sign → Text':[s.cardS2TTitle,s.cardS2TDesc],'Seña → Texto':[s.cardS2TTitle,s.cardS2TDesc],
+      'Learn Sign Language':[s.cardLearnTitle,s.cardLearnDesc],'Aprender LSE':[s.cardLearnTitle,s.cardLearnDesc],
+      'AI Feedback':[s.cardFBTitle,s.cardFBDesc],'Retroalimentación':[s.cardFBTitle,s.cardFBDesc],
+    };
+    if (map[key]) { t.textContent = map[key][0]; d.textContent = map[key][1]; }
+  });
+
+  // Settings home button
+  const hsBtn = document.querySelector('.home-settings-btn');
+  if (hsBtn) {
+    const divs = hsBtn.querySelectorAll('div > div');
+    if (divs[0]) divs[0].textContent = s.settingsBtnTitle;
+    if (divs[1]) divs[1].textContent = s.settingsBtnSub;
   }
 
-  // UI placeholder strings — inline bilingual swap (no external STRINGS dependency)
-  const isEs = lang === 'lse';
-  const PH = {
-    en: {
-      heroSubtitle: 'Choose a translation mode to get started.',
-      s2aPh: 'Video will appear here',
-      a2sPh: 'Sign language video will appear here',
-      t2sPh: 'Sign language video will appear here',
-      s2tPh: 'Your transcription will appear here…',
-    },
-    es: {
-      heroSubtitle: 'Elige un modo de traducción para empezar.',
-      s2aPh: 'El vídeo aparecerá aquí',
-      a2sPh: 'El vídeo en lengua de signos aparecerá aquí',
-      t2sPh: 'El vídeo en lengua de signos aparecerá aquí',
-      s2tPh: 'Tu transcripción aparecerá aquí…',
-    },
+  // Back buttons
+  document.querySelectorAll('.back-btn').forEach(btn => {
+    const view = btn.closest('.view')?.id;
+    btn.textContent = (view === 'view-credits') ? s.backSettings : s.backHome;
+  });
+
+  // Sign → Audio
+  const s2aTitle = document.querySelector('#view-s2a .tool-title');
+  if (s2aTitle) s2aTitle.innerHTML = isEs ? '<span style="color:var(--teal)">Seña</span> a Audio' : '<span style="color:var(--teal)">Sign</span> to Audio';
+  const s2aSub = document.querySelector('#view-s2a .tool-sub'); if (s2aSub) s2aSub.textContent = s.s2aSub;
+  T('s2a-start', s.s2aStart); T('s2a-status', s.s2aStatus);
+  const s2aAudioLbl = document.querySelector('#s2a-audio .audio-lbl'); if (s2aAudioLbl) s2aAudioLbl.textContent = s.s2aAudioLbl;
+
+  // Audio → Sign
+  const a2sTitle = document.querySelector('#view-a2s .tool-title');
+  if (a2sTitle) a2sTitle.innerHTML = isEs ? '<span style="color:var(--amber)">Audio</span> a Seña' : '<span style="color:var(--amber)">Audio</span> to Sign';
+  const a2sSub = document.querySelector('#view-a2s .tool-sub'); if (a2sSub) a2sSub.textContent = s.a2sSub;
+  T('a2s-start', s.a2sStart); T('a2s-status', s.a2sStatus);
+  T('a2s-wave-lbl', s.a2sWaveLbl); T('a2s-ph', s.a2sPh);
+  document.querySelectorAll('#view-a2s .panel-label').forEach(el => {
+    const t = el.textContent.trim();
+    if (t==='Heard'||t==='Escuchado') el.textContent = s.a2sHeardLbl;
+    if (t==='Sign Language Output'||t==='Seña en LSE') el.textContent = s.a2sOutputLbl;
+  });
+
+  // Text → Sign
+  const t2sTitle = document.querySelector('#view-t2s .tool-title');
+  if (t2sTitle) t2sTitle.innerHTML = isEs ? '<span style="color:var(--violet)">Texto</span> a Seña' : '<span style="color:var(--violet)">Text</span> to Sign';
+  const t2sSub = document.querySelector('#view-t2s .tool-sub'); if (t2sSub) t2sSub.textContent = s.t2sSub;
+  P('t2s-input', s.t2sPlaceholder); T('t2s-send', s.t2sBtn); T('t2s-status', s.t2sStatus);
+  T('t2s-ph', s.t2sPh);
+  document.querySelectorAll('#view-t2s .panel-label').forEach(el => {
+    const t = el.textContent.trim();
+    if (t==='Your message'||t==='Tu mensaje') el.textContent = s.t2sMsgLbl;
+    if (t==='Sign Language Output'||t==='Seña en LSE') el.textContent = s.t2sOutputLbl;
+  });
+
+  // Sign → Text
+  const s2tTitle = document.querySelector('#view-s2t .tool-title');
+  if (s2tTitle) s2tTitle.innerHTML = isEs ? '<span style="color:var(--rose)">Seña</span> a Texto' : '<span style="color:var(--rose)">Sign</span> to Text';
+  const s2tSub = document.querySelector('#view-s2t .tool-sub'); if (s2tSub) s2tSub.textContent = s.s2tSub;
+  T('s2t-start', s.s2tStart); T('s2t-stop', s.s2tStop); T('s2t-status', s.s2tStatus);
+  const s2tOut = document.getElementById('s2t-out');
+  if (s2tOut && s2tOut.classList.contains('ph')) s2tOut.textContent = s.s2tPh;
+  const s2tClearBtn = document.querySelector('#view-s2t .clear-btn-sm'); if (s2tClearBtn) s2tClearBtn.textContent = s.s2tClearBtn;
+
+  // AI Feedback view
+  const fbTitle = document.querySelector('#view-feedback .tool-title');
+  if (fbTitle) fbTitle.innerHTML = isEs ? '<span style="color:var(--violet)">Retroalimentación</span> IA' : '<span style="color:var(--violet)">AI</span> Feedback';
+  const fbSub = document.querySelector('#view-feedback .tool-sub'); if (fbSub) fbSub.textContent = s.fbSub;
+  T('fb-start-btn', s.fbStart); T('fb-stop-btn', s.fbStop); T('fb-status', s.fbStatus);
+  const fbYesBtn = document.querySelector('#fb-yn-area .btn:first-child'); if (fbYesBtn) fbYesBtn.textContent = s.fbYes;
+  const fbNoBtn = document.querySelector('#fb-yn-area .btn-stop'); if (fbNoBtn) fbNoBtn.textContent = s.fbNo;
+  const fbAgainBtn = document.querySelector('#fb-yn-area .btn:last-child'); if (fbAgainBtn) fbAgainBtn.textContent = s.fbAgain;
+  T('fb-pred-label', s.fbPredLbl);
+  const fbDoneNote = document.getElementById('fb-done-note'); if (fbDoneNote && !fbDoneNote.dataset.custom) fbDoneNote.textContent = s.fbDoneNote;
+  const fbRecBtn = document.querySelector('#fb-done-screen .btn'); if (fbRecBtn) fbRecBtn.textContent = s.fbRecordAnother;
+  const fbCorrLbl = document.querySelector('#fb-correction-area > div'); if (fbCorrLbl) fbCorrLbl.textContent = s.fbCorrectLbl;
+  const fbBackBtn = document.querySelector('#fb-correction-area .btn-stop'); if (fbBackBtn) fbBackBtn.textContent = s.fbBack;
+
+  // Learn view
+  const learnTitle = document.querySelector('#view-learn .tool-title');
+  if (learnTitle) learnTitle.innerHTML = isEs ? '<span style="color:#4ade80">Aprender</span> LSE' : '<span style="color:#4ade80">Learn</span> Sign Language';
+  const learnSub = document.querySelector('#view-learn .tool-sub'); if (learnSub) learnSub.textContent = s.learnSub;
+  T('learn-start-btn', s.learnStart); T('learn-stop-btn', s.learnStop);
+  const learnSkipBtn = document.getElementById('learn-skip-btn'); if (learnSkipBtn) learnSkipBtn.textContent = s.learnSkip;
+  const learnNoModel = document.querySelector('#learn-no-model > div'); if (learnNoModel) learnNoModel.textContent = s.learnNoModel;
+  const learnMoreBtn = document.querySelector('#learn-complete .btn'); if (learnMoreBtn) learnMoreBtn.textContent = s.learnMore;
+  const learnWatchLbl = document.querySelector('#learn-practise p:first-of-type'); if (learnWatchLbl) learnWatchLbl.textContent = s.learnWatchLbl;
+  const learnAttemptLbl = document.querySelector('#learn-practise p:last-of-type'); if (learnAttemptLbl) learnAttemptLbl.textContent = s.learnAttemptLbl;
+
+  // Settings page
+  const stTitle = document.querySelector('#view-settings .tool-title'); if (stTitle) stTitle.textContent = s.settingsTitle;
+  const stSub = document.querySelector('#view-settings .tool-sub'); if (stSub) stSub.textContent = s.settingsSub;
+  const fpLabel = document.querySelector('.fs-preview-label'); if (fpLabel) fpLabel.textContent = s.fontPreviewLabel;
+  const fpText = document.getElementById('fs-preview-text'); if (fpText) fpText.textContent = s.fontPreviewText;
+  document.querySelectorAll('.setting-label').forEach(el => {
+    const map = {
+      'Font Size':s.fontSizeLabel,'Tamaño de fuente':s.fontSizeLabel,
+      'Playback Volume':s.volLabel,'Volumen de reproducción':s.volLabel,
+      'Mic Sensitivity':s.micLabel,'Sensibilidad del micrófono':s.micLabel,
+      'Language & AI Model':s.langLabel,'Idioma y modelo de IA':s.langLabel,
+      'Reset to Defaults':s.resetLabel,'Restablecer valores':s.resetLabel,
+      'Credits':s.creditsLabel,'Créditos':s.creditsLabel,
+    };
+    const v = map[el.textContent.trim()]; if (v) el.textContent = v;
+  });
+  document.querySelectorAll('.setting-desc').forEach(el => {
+    const map = {
+      'Makes all text bigger or smaller':s.fontSizeDesc,'Hace el texto más grande o más pequeño':s.fontSizeDesc,
+      'How loud the translated audio plays':s.volDesc,'Qué tan alto suena el audio traducido':s.volDesc,
+      'How strongly the waveform reacts':s.micDesc,'Qué tan fuerte reacciona la forma de onda':s.micDesc,
+      'Switches translation language and loads the matching AI model on the server':s.langDesc,
+      'Cambia el idioma de traducción y carga el modelo de IA correspondiente en el servidor':s.langDesc,
+      'Restore all settings to original values':s.resetDesc,'Restaurar todos los ajustes originales':s.resetDesc,
+      'The team and tech behind SignFuture':s.creditsDesc,'El equipo y la tecnología detrás de SignFuture':s.creditsDesc,
+    };
+    const v = map[el.textContent.trim()]; if (v) el.textContent = v;
+  });
+  const resetBtn = document.querySelector('[onclick="resetSettings()"]'); if (resetBtn) resetBtn.textContent = s.resetBtn;
+
+  // Mic test
+  const mtTitle = document.querySelector('.mic-test-title'); if (mtTitle) mtTitle.textContent = s.micTestTitle;
+  const mtDesc = document.querySelector('.mic-test-desc'); if (mtDesc) mtDesc.innerHTML = s.micTestDesc;
+  T('mic-test-start', s.micTestStart); T('mic-test-stop', s.micTestStop);
+  const mtStatus = document.getElementById('mic-test-status');
+  if (mtStatus && (mtStatus.textContent.includes('Ready')||mtStatus.textContent.includes('Listo'))) mtStatus.textContent = s.micTestStatus;
+  const mtSpPh = document.getElementById('mic-speech-out');
+  if (mtSpPh && mtSpPh.classList.contains('ph')) mtSpPh.textContent = s.micSpeechPh;
+  document.querySelectorAll('.mic-meter-label').forEach(el => {
+    const t = el.textContent.trim();
+    if (t.includes('Input Level')||t.includes('Nivel de entrada')) el.textContent = s.micLevelLbl;
+    if (t.includes('Waveform')||t.includes('Forma de onda')) el.textContent = s.micWaveLbl;
+  });
+  const mtHearLbl = document.querySelector('.mic-speech-label'); if (mtHearLbl) mtHearLbl.textContent = s.micHearLbl;
+  const mtHint = document.getElementById('mic-db-hint');
+  if (mtHint && (mtHint.textContent.includes('Start')||mtHint.textContent.includes('Inicia'))) mtHint.textContent = s.micHint;
+
+  // Nav labels
+  const navMap = {
+    home:'Home', s2a:isEs?'Seña→Audio':'Sign→Audio',
+    a2s:isEs?'Audio→Seña':'Audio→Sign', t2s:isEs?'Texto→Seña':'Text→Sign',
+    s2t:isEs?'Seña→Texto':'Sign→Text', learn:isEs?'Aprender':'Learn',
+    feedback:isEs?'Mejorar':'Feedback', settings:isEs?'Ajustes':'Settings'
   };
-  const ph = isEs ? PH.es : PH.en;
-  try {
-    const heroSub = document.querySelector('.view-home .hero-subtitle');
-    if (heroSub) heroSub.textContent = ph.heroSubtitle;
-    const s2aPhEl = document.getElementById('s2a-ph'); if (s2aPhEl) s2aPhEl.textContent = ph.s2aPh;
-    const a2sPhEl = document.getElementById('a2s-ph'); if (a2sPhEl) a2sPhEl.textContent = ph.a2sPh;
-    const t2sPhEl = document.getElementById('t2s-ph'); if (t2sPhEl) t2sPhEl.textContent = ph.t2sPh;
-    const s2tPhEl = document.getElementById('s2t-ph'); if (s2tPhEl) s2tPhEl.textContent = ph.s2tPh;
-  } catch(_) {}
+  document.querySelectorAll('.nav-item').forEach(btn => {
+    const lbl = btn.querySelector('.nav-label');
+    if (lbl && navMap[btn.dataset.view]) lbl.textContent = navMap[btn.dataset.view];
+  });
 
   _activeLang = lang;
 }
@@ -1496,6 +1844,8 @@ function diagSet(id, status, detail) {
 // ═══════════════════════════════════════════════════════════════════════════════
 // PATCH diagRunAll — dual model rows
 // ═══════════════════════════════════════════════════════════════════════════════
+const testWord = 'blood'; // known word in ASL dict for diagnostics
+let _trainPollInterval = null;
 async function diagRunAll() {
   const btn = document.getElementById('diag-run-btn');
   btn.disabled    = true;
@@ -1688,7 +2038,7 @@ async function apiFetch(endpoint, opts = {}) {
 
 // ── clip queue player ─────────────────────────────────────────────────────────
 // Plays a list of clip URLs one after another in the given <video> element.
-// Shows dots below the player indicating progress.
+// Pre-fetches all clips as blob URLs so playback is instant with no network stalls.
 function playClips(videoEl, phEl, dotsEl, clipUrls, onDone) {
   phEl.style.display = 'none';
   videoEl.style.display = 'block';
@@ -1703,22 +2053,62 @@ function playClips(videoEl, phEl, dotsEl, clipUrls, onDone) {
     return d;
   });
 
-  let idx = 0;
-  function playNext() {
-    if (idx >= clipUrls.length) {
-      if (onDone) onDone();
-      return;
-    }
-    dots.forEach((d, i) => {
-      d.className = 'clip-dot' + (i < idx ? ' done' : i === idx ? ' playing' : '');
-    });
-    videoEl.src = API + clipUrls[idx];
-    videoEl.play().catch(console.warn);
-    idx++;
+  // Pre-fetch all clips as blobs in parallel so each transition is instant
+  let blobUrls = [];
+  let cancelled = false;
+
+  // Clean up blob URLs when done to free memory
+  function cleanup() {
+    blobUrls.forEach(u => { try { URL.revokeObjectURL(u); } catch(_) {} });
+    blobUrls = [];
   }
-  videoEl.onended = playNext;
-  videoEl.onerror = () => { console.warn('clip error'); playNext(); };
-  playNext();
+
+  // Attach a cancel handle on the element so a new call can abort an in-progress one
+  if (videoEl._cancelClips) videoEl._cancelClips();
+  videoEl._cancelClips = () => {
+    cancelled = true;
+    videoEl.onended = null;
+    videoEl.onerror = null;
+    videoEl.pause();
+    cleanup();
+  };
+
+  Promise.all(clipUrls.map(url =>
+    fetch(API + url)
+      .then(r => r.blob())
+      .then(b => URL.createObjectURL(b))
+      .catch(() => null)  // on error keep null, playNext will skip it
+  )).then(urls => {
+    if (cancelled) return;
+    blobUrls = urls;
+
+    let idx = 0;
+    function playNext() {
+      if (cancelled) return;
+      // Skip any clips that failed to fetch
+      while (idx < blobUrls.length && !blobUrls[idx]) idx++;
+      if (idx >= blobUrls.length) {
+        cleanup();
+        if (onDone) onDone();
+        return;
+      }
+      dots.forEach((d, i) => {
+        d.className = 'clip-dot' + (i < idx ? ' done' : i === idx ? ' playing' : '');
+      });
+      videoEl.src = blobUrls[idx];
+      // Preload the next clip into the browser cache while this one plays
+      if (idx + 1 < blobUrls.length && blobUrls[idx + 1]) {
+        const pre = document.createElement('video');
+        pre.preload = 'auto';
+        pre.src = blobUrls[idx + 1];
+      }
+      videoEl.play().catch(console.warn);
+      idx++;
+    }
+    videoEl.onended = playNext;
+    videoEl.onerror = () => { console.warn('clip error'); idx++; playNext(); };
+    playNext();
+  });
 }
 
 // ═══════════════════════════════
@@ -1780,7 +2170,7 @@ async function s2aStart() {
   document.getElementById('s2a-audio').classList.remove('show');
   document.getElementById('s2a-start').disabled=true;
   document.getElementById('s2a-stop').disabled=false;
-  try { s2aStream = await navigator.mediaDevices.getUserMedia({video:true,audio:true}); }
+  try { s2aStream = await navigator.mediaDevices.getUserMedia({video:{width:{ideal:640},height:{ideal:480},frameRate:{ideal:15}},audio:true}); }
   catch(e) {
     resetUI('s2a-start','s2a-stop');
     const m = permErr(e,true);
@@ -1789,7 +2179,7 @@ async function s2aStart() {
     return;
   }
   document.getElementById('s2a-vid').srcObject = s2aStream;
-  s2aRec = new MediaRecorder(s2aStream, {mimeType: getMime(true)});
+  s2aRec = new MediaRecorder(s2aStream, {mimeType: getMime(true), videoBitsPerSecond: 500000});
   s2aRec.ondataavailable = e => { if(e.data&&e.data.size>0) s2aBuf.push(e.data); };
   s2aRec.start(100);
   document.getElementById('s2a-rec').classList.add('on');
@@ -2001,7 +2391,7 @@ async function s2tStart() {
   s2tBuf=[];
   document.getElementById('s2t-start').disabled=true;
   document.getElementById('s2t-stop').disabled=false;
-  try { s2tStream = await navigator.mediaDevices.getUserMedia({video:true,audio:false}); }
+  try { s2tStream = await navigator.mediaDevices.getUserMedia({video:{width:{ideal:640},height:{ideal:480},frameRate:{ideal:15}},audio:false}); }
   catch(e) {
     resetUI('s2t-start','s2t-stop');
     const m = permErr(e,true);
@@ -2010,7 +2400,7 @@ async function s2tStart() {
     return;
   }
   document.getElementById('s2t-vid').srcObject = s2tStream;
-  s2tRec = new MediaRecorder(s2tStream, {mimeType: getMime(true)});
+  s2tRec = new MediaRecorder(s2tStream, {mimeType: getMime(true), videoBitsPerSecond: 500000});
   s2tRec.ondataavailable = e => { if(e.data&&e.data.size>0) s2tBuf.push(e.data); };
   s2tRec.start(100);
   document.getElementById('s2t-rec').classList.add('on');
@@ -2033,12 +2423,8 @@ async function s2tStop() {
     const pct = data.confidence ? Math.round(data.confidence * 100) : null;
     const confStr = pct !== null ? ` (${pct}% confidence)` : '';
     setStatus('s2t-status','✅ Recognised: "'+data.text+'"'+confStr);
-    // Store session for feedback modal and show floating button
-    _fbSessionId = data.session_id || null;
-    _fbPredicted = data.text || '';
-    _fbConf      = data.confidence || 0;
-    fbBtnShow();
-if (current === 'feedback') fbViewInit();
+    // Store session_id so feedback buttons (correct/wrong) can reference this prediction
+    document.getElementById('s2t-stop').dataset.sessionId = data.session_id || '';
   } catch(err) {
     const notTrained = err.message && (err.message.includes("hasn't been trained") || err.message.includes("not_trained") || err.message.includes('503'));
     if (notTrained) {
@@ -2055,7 +2441,6 @@ if (current === 'feedback') fbViewInit();
 function s2tClear() {
   const o = document.getElementById('s2t-out'); o.textContent='Your transcription will appear here…'; o.classList.add('ph');
   setStatus('s2t-status','');
-  fbBtnHide();
 }
 
 // ═══════════════════════════════
@@ -2187,7 +2572,7 @@ async function recStart() {
   document.getElementById('rec-status').textContent = `🔴 Recording "${label}" — perform the sign clearly and repeatedly…`;
 
   try {
-    trainStream = await navigator.mediaDevices.getUserMedia({video:true, audio:false});
+    trainStream = await navigator.mediaDevices.getUserMedia({video:{width:{ideal:640},height:{ideal:480},frameRate:{ideal:15}},audio:false});
   } catch(e) {
     document.getElementById('rec-status').textContent = '❌ Camera blocked: ' + e.message;
     document.getElementById('rec-start-btn').disabled = false;
@@ -2217,351 +2602,6 @@ async function recStart() {
   trainRec.start(100);
 }
 
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// LEARN TO SIGN
-// Flow: pick word → watch demo clip → record attempt → AI checks → pass/retry
-// Passes when confidence >= LEARN_THRESHOLD for the target word specifically.
-// ═══════════════════════════════════════════════════════════════════════════════
-
-const LEARN_THRESHOLD = 0.88;  // 88% confidence required to pass
-
-let _learnWord     = null;   // currently selected word
-let _learnAttempts = 0;      // attempts this word
-let _learnStream   = null;
-let _learnRec      = null;
-let _learnBuf      = [];
-
-// ── Init: load available words from /health ───────────────────────────────────
-async function learnInit() {
-  const grid = document.getElementById('learn-word-grid');
-  grid.innerHTML = '<div style="padding:0 16px;color:rgba(255,255,255,.4);font-size:13px;">Loading…</div>';
-  try {
-    const d = await apiFetch('/health');
-    const labels = (d.model_labels || []).sort();
-    if (!labels.length) {
-      grid.innerHTML = '<div style="padding:0 16px;color:var(--rose);font-size:13px;">No trained signs found. Train a model first.</div>';
-      return;
-    }
-    grid.innerHTML = labels.map(w =>
-      `<button class="learn-word-btn" onclick="learnSelectWord('${w}')">${w}</button>`
-    ).join('');
-  } catch(e) {
-    grid.innerHTML = '<div style="padding:0 16px;color:var(--rose);font-size:13px;">Could not reach server.</div>';
-  }
-}
-
-// ── Word selection ────────────────────────────────────────────────────────────
-function learnSelectWord(word) {
-  _learnWord = word;
-  document.querySelectorAll('.learn-word-btn').forEach(b => {
-    b.classList.toggle('selected', b.textContent === word);
-  });
-  document.getElementById('learn-start-btn').disabled = false;
-}
-
-// ── Start: go to watch step ───────────────────────────────────────────────────
-async function learnStart() {
-  if (!_learnWord) return;
-  _learnAttempts = 0;
-  learnShowStep('watch');
-
-  document.getElementById('learn-watch-label').textContent =
-    'Watching: "' + _learnWord + '" — study the hand shape and movement';
-
-  const watchedBtn = document.getElementById('learn-watched-btn');
-  watchedBtn.disabled = true;
-
-  // Fetch the demo clip via text-to-sign
-  try {
-    const d = await apiFetch('/text-to-sign', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({text: _learnWord})
-    });
-    const vid = document.getElementById('learn-demo-vid');
-    vid.src = d.clips[0];
-    vid.loop = true;
-    vid.onloadeddata = () => { watchedBtn.disabled = false; };
-    vid.onerror = () => {
-      watchedBtn.disabled = false;
-      document.getElementById('learn-watch-label').textContent =
-        'Could not load demo clip — press to continue anyway';
-    };
-    vid.load();
-    vid.play().catch(() => {});
-  } catch(e) {
-    watchedBtn.disabled = false;
-    document.getElementById('learn-watch-label').textContent =
-      'Demo clip unavailable — press to continue anyway';
-  }
-}
-
-// ── Go to record step ─────────────────────────────────────────────────────────
-function learnGoRecord() {
-  // Stop demo video
-  const vid = document.getElementById('learn-demo-vid');
-  vid.pause(); vid.src = '';
-  learnShowStep('try');
-  setStatus('learn-try-status', 'Press Start when ready — sign "' + _learnWord + '" clearly.');
-}
-
-// ── Recording ─────────────────────────────────────────────────────────────────
-async function learnRecStart() {
-  _learnBuf = [];
-  document.getElementById('learn-rec-start').disabled = true;
-  document.getElementById('learn-rec-stop').disabled  = false;
-  try {
-    _learnStream = await navigator.mediaDevices.getUserMedia({video: true, audio: false});
-  } catch(e) {
-    document.getElementById('learn-rec-start').disabled = false;
-    document.getElementById('learn-rec-stop').disabled  = true;
-    setStatus('learn-try-status', '❌ ' + permErr(e, true));
-    return;
-  }
-  document.getElementById('learn-cam-vid').srcObject = _learnStream;
-  _learnRec = new MediaRecorder(_learnStream, {mimeType: getMime(true)});
-  _learnRec.ondataavailable = e => { if (e.data && e.data.size > 0) _learnBuf.push(e.data); };
-  _learnRec.start(100);
-  document.getElementById('learn-rec-pill').classList.add('on');
-  setStatus('learn-try-status', '🔴 Recording — sign "' + _learnWord + '" clearly, then press Stop.');
-}
-
-async function learnRecStop() {
-  document.getElementById('learn-rec-stop').disabled = true;
-  setStatus('learn-try-status', '⏳ Checking your sign…');
-  await safeStop(_learnRec);
-  stopStream(_learnStream); _learnStream = null;
-  document.getElementById('learn-cam-vid').srcObject = null;
-  document.getElementById('learn-rec-pill').classList.remove('on');
-
-  if (!_learnBuf.length) {
-    document.getElementById('learn-rec-start').disabled = false;
-    document.getElementById('learn-rec-stop').disabled  = true;
-    setStatus('learn-try-status', '⚠️ Nothing recorded — try again.');
-    return;
-  }
-
-  const blob = new Blob(_learnBuf, {type: _learnBuf[0].type});
-  _learnBuf = [];
-  _learnAttempts++;
-
-  try {
-    const data = await apiFetch('/learn-check', {
-      method: 'POST',
-      body: blob,
-      headers: {
-        'Content-Type':   'application/octet-stream',
-        'X-Target-Word':  _learnWord,
-      }
-    });
-
-    learnShowResult(data.passed, data.recognised, data.target_conf);
-
-  } catch(err) {
-    // Server returned an error (low confidence, no hand detected, etc.)
-    // Try to extract partial confidence if available
-    learnShowResult(false, null, 0, err.message);
-  }
-}
-
-// ── Show result ───────────────────────────────────────────────────────────────
-function learnShowResult(passed, recognised, conf, errMsg) {
-  learnShowStep('result');
-
-  const ring      = document.getElementById('learn-result-ring');
-  const title     = document.getElementById('learn-result-title');
-  const sub       = document.getElementById('learn-result-sub');
-  const bar       = document.getElementById('learn-conf-bar');
-  const barLabel  = document.getElementById('learn-conf-label');
-  const attempts  = document.getElementById('learn-attempt-count');
-  const retryBtn  = document.getElementById('learn-retry-btn');
-  const nextBtn   = document.getElementById('learn-next-btn');
-
-  const pct = Math.round(conf * 100);
-
-  if (passed) {
-    ring.textContent = '✅';
-    ring.className   = 'learn-attempt-ring pass';
-    title.textContent = 'Nailed it!';
-    sub.textContent   = `"${_learnWord}" — ${pct}% confidence`;
-    sub.style.color   = 'var(--teal)';
-    bar.style.background = '#00f5ce';
-    retryBtn.style.display = 'none';
-    nextBtn.textContent = '🎉 Next word ▶';
-  } else {
-    ring.textContent = '❌';
-    ring.className   = 'learn-attempt-ring fail';
-    if (errMsg) {
-      title.textContent = 'Not recognised';
-      sub.textContent   = 'Make sure your hand is clearly visible and sign slowly.';
-    } else if (recognised && recognised !== _learnWord) {
-      title.textContent = `Looks like "${recognised}"`;
-      sub.textContent   = `Target: "${_learnWord}" — needed ${Math.round(LEARN_THRESHOLD*100)}%, got ${pct}%`;
-    } else {
-      title.textContent = `Almost — ${pct}%`;
-      sub.textContent   = `Need ${Math.round(LEARN_THRESHOLD*100)}% to pass. Keep practising!`;
-    }
-    sub.style.color = 'var(--rose)';
-    bar.style.background = pct > 60 ? 'var(--amber)' : 'var(--rose)';
-    retryBtn.style.display = '';
-    nextBtn.textContent = 'Skip word ▶';
-  }
-
-  bar.style.width  = pct + '%';
-  barLabel.textContent = `Confidence: ${pct}% / needed: ${Math.round(LEARN_THRESHOLD*100)}%`;
-  attempts.textContent = `Attempt ${_learnAttempts}`;
-  document.getElementById('learn-rec-start').disabled = false;
-  document.getElementById('learn-rec-stop').disabled  = true;
-}
-
-// ── Pick a new word (resets to picker) ───────────────────────────────────────
-function learnPickNew() {
-  _learnWord = null;
-  _learnAttempts = 0;
-  document.querySelectorAll('.learn-word-btn').forEach(b => b.classList.remove('selected'));
-  document.getElementById('learn-start-btn').disabled = true;
-  learnShowStep('pick');
-}
-
-// ── Exit learn mode ───────────────────────────────────────────────────────────
-function learnExit() {
-  stopStream(_learnStream); _learnStream = null;
-  const vid = document.getElementById('learn-demo-vid');
-  vid.pause(); vid.src = '';
-  _learnWord = null; _learnAttempts = 0;
-  nav('home');
-}
-
-// ── Helper: show only the active step ────────────────────────────────────────
-function learnShowStep(step) {
-  ['pick','watch','try','result'].forEach(s => {
-    const el = document.getElementById('learn-step-' + s);
-    if (el) el.classList.toggle('active', s === step);
-  });
-}
-
-
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// FEEDBACK SYSTEM
-// Floating button appears after every Sign→Text prediction.
-// Correct → stores 1 copy of the video, retrains immediately.
-// Wrong   → user picks correct label, stores 10 copies, retrains immediately.
-// ═══════════════════════════════════════════════════════════════════════════════
-
-let _fbSessionId  = null;
-let _fbPredicted  = '';
-let _fbConf       = 0;
-let _fbLabels     = [];
-
-function fbBtnShow() {
-  const btn = document.getElementById('s2t-fb-btn');
-  if (btn) btn.classList.add('show');
-}
-function fbBtnHide() {
-  const btn = document.getElementById('s2t-fb-btn');
-  if (btn) btn.classList.remove('show');
-}
-
-function fbModalOpen() {
-  const pct = Math.round(_fbConf * 100);
-  document.getElementById('fb-modal-pred').textContent = _fbPredicted || '(unknown)';
-  document.getElementById('fb-modal-conf').textContent = pct ? pct + '% confidence' : '';
-  document.getElementById('fb-yn-btns').style.display     = '';
-  document.getElementById('fb-correction-area').style.display = 'none';
-  document.getElementById('fb-done-area').style.display   = 'none';
-  document.getElementById('fb-modal').classList.add('show');
-}
-
-function fbModalClose() {
-  document.getElementById('fb-modal').classList.remove('show');
-}
-
-function fbModalBgClick(e) {
-  if (e.target === document.getElementById('fb-modal')) fbModalClose();
-}
-
-async function fbSubmitYes() {
-  if (!_fbSessionId) { fbModalClose(); return; }
-  document.getElementById('fb-yn-btns').style.display = 'none';
-  document.getElementById('fb-done-area').style.display = '';
-  document.getElementById('fb-done-msg').textContent = '✓ Saved — training 1x on this sign…';
-  document.getElementById('fb-training-note').textContent = 'Retraining model in background';
-
-  try {
-    await fetch('/feedback', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({session_id: _fbSessionId, correct: true})
-    });
-    document.getElementById('fb-done-msg').textContent = '✅ Done! Model trained 1x on "' + _fbPredicted + '"';
-    document.getElementById('fb-training-note').textContent = 'Retraining started in background';
-  } catch(e) {
-    document.getElementById('fb-done-msg').textContent = '⚠️ Could not send feedback: ' + e.message;
-  }
-
-  fbBtnHide();
-  setTimeout(fbModalClose, 2000);
-}
-
-async function fbShowCorrection() {
-  document.getElementById('fb-yn-btns').style.display = 'none';
-  document.getElementById('fb-correction-area').style.display = '';
-
-  // Load labels if needed
-  if (!_fbLabels.length) {
-    try {
-      const h = await fetch('/health').then(r => r.json());
-      _fbLabels = (h.model_labels || []).sort();
-    } catch(_) {}
-  }
-
-  const grid = document.getElementById('fb-correction-grid');
-  grid.innerHTML = '';
-  (_fbLabels.length ? _fbLabels : ['(no labels)']).forEach(lbl => {
-    const btn = document.createElement('button');
-    btn.className = 'fb-correction-btn';
-    btn.textContent = lbl;
-    btn.onclick = () => fbSubmitCorrection(lbl);
-    grid.appendChild(btn);
-  });
-}
-
-function fbHideCorrection() {
-  document.getElementById('fb-correction-area').style.display = 'none';
-  document.getElementById('fb-yn-btns').style.display = '';
-}
-
-async function fbSubmitCorrection(correctLabel) {
-  if (!_fbSessionId) { fbModalClose(); return; }
-  document.getElementById('fb-correction-area').style.display = 'none';
-  document.getElementById('fb-done-area').style.display = '';
-  document.getElementById('fb-done-msg').textContent = '⏳ Saving 10x as "' + correctLabel + '"…';
-  document.getElementById('fb-training-note').textContent = 'Heavy correction — retraining model in background';
-
-  // Update s2t output to show the correction
-  const o = document.getElementById('s2t-out');
-  if (o) { o.textContent = correctLabel; o.classList.remove('ph'); }
-  setStatus('s2t-status', '✅ Corrected to: "' + correctLabel + '" — trained 10x');
-
-  try {
-    await fetch('/feedback', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({session_id: _fbSessionId, correct: false, label: correctLabel})
-    });
-    document.getElementById('fb-done-msg').textContent = '✅ Saved 10x as "' + correctLabel + '" — model is retraining';
-    document.getElementById('fb-training-note').textContent = 'The AI will be better next time';
-  } catch(e) {
-    document.getElementById('fb-done-msg').textContent = '⚠️ Could not send: ' + e.message;
-  }
-
-  fbBtnHide();
-  setTimeout(fbModalClose, 2500);
-}
-
-
 // CURSOR
 // ═══════════════════════════════
 const cur=document.getElementById('cur'), curR=document.getElementById('curR');
@@ -2578,77 +2618,687 @@ document.querySelectorAll('button,a,textarea,input[type=range]').forEach(el=>{
   el.addEventListener('mouseleave',()=>{cur.style.width='10px';cur.style.height='10px';curR.style.width='32px';curR.style.height='32px';curR.style.opacity='.4';});
 });
 
-function fbViewInit() {
-  if (_fbSessionId) {
-    document.getElementById('fb-view-idle').style.display  = 'none';
-    document.getElementById('fb-view-ready').style.display = '';
-    document.getElementById('fbv-pred').textContent = _fbPredicted || '(unknown)';
-    const pct = Math.round(_fbConf * 100);
-    document.getElementById('fbv-conf').textContent = pct ? pct + '% confidence' : '';
-    document.getElementById('fbv-yn').style.display        = '';
-    document.getElementById('fbv-correction').style.display = 'none';
-    document.getElementById('fbv-done').style.display      = 'none';
-  } else {
-    document.getElementById('fb-view-idle').style.display  = '';
-    document.getElementById('fb-view-ready').style.display = 'none';
-  }
-}
 
-async function fbViewYes() {
-  if (!_fbSessionId) return;
-  document.getElementById('fbv-yn').style.display   = 'none';
-  document.getElementById('fbv-done').style.display = '';
-  document.getElementById('fbv-done-msg').textContent  = '⏳ Training on "' + _fbPredicted + '"…';
-  document.getElementById('fbv-done-note').textContent = 'Sending to server';
+// ═══════════════════════════════════════════════════════════════════════════════
+// LEARN MODE
+// Flow: pick sign → watch demo clip → record yourself → AI scores → pass(≥95%) or retry
+// ═══════════════════════════════════════════════════════════════════════════════
+const LEARN_PASS_THRESHOLD = 0.65;  // 65% confidence required to pass
+
+let learnSigns       = [];   // [{label, clipUrl}] — signs the model knows that also have a clip
+let learnQueue       = [];   // signs to practise this session (shuffled subset)
+let learnQueueIdx    = 0;    // current position in queue
+let learnAttempts    = 0;    // attempts on current sign
+let learnStreak      = 0;    // consecutive passes
+let learnStream      = null;
+let learnRec         = null;
+let learnBuf         = [];
+let learnDemoBlobUrl = null;
+
+// Called when user taps the Learn nav item
+async function learnInit() {
+  // Reset to pick screen
+  document.getElementById('learn-pick').style.display = '';
+  document.getElementById('learn-practise').style.display = 'none';
+  document.getElementById('learn-complete').style.display = 'none';
+
+  const grid = document.getElementById('learn-sign-grid');
+  grid.innerHTML = '<span style="padding:0 4px;font-size:13px;color:rgba(255,255,255,.4);">Loading signs…</span>';
+
   try {
-    await fetch('/feedback', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({session_id:_fbSessionId,correct:true})});
-    document.getElementById('fbv-done-msg').textContent  = '✅ Trained 1× on "' + _fbPredicted + '"';
-    document.getElementById('fbv-done-note').textContent = 'Model is retraining in background';
+    const lang = _activeLang || 'asl';
+
+    // Get model labels and all learnable signs in parallel
+    const [healthData, signsData] = await Promise.all([
+      fetch('/health').then(r => r.json()).catch(() => ({})),
+      fetch('/learn-signs?lang=' + lang).then(r => r.json()).catch(() => null)
+    ]);
+
+    const modelLabels = new Set((healthData.model_labels || []).map(l => l.toLowerCase()));
+    const modelTrained = modelLabels.size > 0;
+
+    // Show/hide the "model not trained" warning (non-blocking — user can still watch clips)
+    document.getElementById('learn-no-model').style.display = modelTrained ? 'none' : '';
+
+    // Build sign list from /learn-signs (server does the clip-existence check efficiently)
+    if (signsData && signsData.signs && signsData.signs.length > 0) {
+      learnSigns = signsData.signs;
+    } else {
+      // Fallback: probe each model label one by one
+      learnSigns = [];
+      for (const label of modelLabels) {
+        try {
+          const r = await fetch('/text-to-sign', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({text: label})
+          });
+          if (!r.ok) continue;
+          const d = await r.json();
+          if (d.clips && d.clips.length > 0) learnSigns.push({label, clipUrl: d.clips[0]});
+        } catch(_) {}
+      }
+    }
+
+    if (learnSigns.length === 0) {
+      grid.innerHTML = '<span style="padding:0 4px;font-size:13px;color:rgba(255,255,255,.4);">No sign clips found. Make sure your clips folder has .mp4 files.</span>';
+      return;
+    }
+
+    // Render sign picker grid — mark AI-scoreable vs watch-only
+    grid.innerHTML = '';
+    learnSigns.forEach(({label, clipUrl}) => {
+      const canScore = modelTrained && modelLabels.has(label.toLowerCase());
+      const btn = document.createElement('button');
+      btn.className = 'learn-sign-btn';
+      btn.innerHTML = `
+        <span class="learn-sign-name">${label}</span>
+        <span class="learn-sign-sub">${lang.toUpperCase()} ${canScore ? '· AI scoring' : '· watch only'}</span>`;
+      btn.onclick = () => learnStartSign(label);
+      grid.appendChild(btn);
+    });
+
   } catch(e) {
-    document.getElementById('fbv-done-msg').textContent  = '⚠️ Could not send: ' + e.message;
+    grid.innerHTML = '<span style="padding:0 4px;font-size:13px;color:rgba(255,122,170,.6);">Failed to load signs: ' + e.message + '</span>';
   }
-  fbBtnHide(); _fbSessionId = null;
 }
 
-async function fbViewShowCorrection() {
-  document.getElementById('fbv-yn').style.display        = 'none';
-  document.getElementById('fbv-correction').style.display = '';
-  if (!_fbLabels.length) {
-    try { const h = await fetch('/health').then(r=>r.json()); _fbLabels = (h.model_labels||[]).sort(); } catch(_) {}
+// User picked a specific sign — start single-sign practise
+async function learnStartSign(label) {
+  // Build a single-sign queue (just this sign, repeated until passed)
+  const sign = learnSigns.find(s => s.label === label);
+  if (!sign) return;
+
+  learnQueue    = [sign];
+  learnQueueIdx = 0;
+  learnAttempts = 0;
+
+  document.getElementById('learn-pick').style.display = 'none';
+  document.getElementById('learn-practise').style.display = '';
+  document.getElementById('learn-complete').style.display = 'none';
+
+  await learnShowCurrentSign();
+}
+
+// Show demo clip + reset UI for current sign in queue
+async function learnShowCurrentSign() {
+  const sign = learnQueue[learnQueueIdx];
+  if (!sign) { learnShowComplete(); return; }
+
+  learnAttempts = 0;
+  _learnHideResult();
+
+  // Progress bar
+  const pct = learnQueue.length > 1 ? Math.round((learnQueueIdx / learnQueue.length) * 100) : 0;
+  document.getElementById('learn-prog-fill').style.width = pct + '%';
+  document.getElementById('learn-prog-label').textContent = (learnQueueIdx + 1) + ' / ' + learnQueue.length;
+
+  // Streak badge
+  const streakEl = document.getElementById('learn-streak');
+  if (learnStreak >= 2) {
+    streakEl.style.display = 'inline-flex';
+    document.getElementById('learn-streak-n').textContent = learnStreak;
+  } else {
+    streakEl.style.display = 'none';
   }
-  const grid = document.getElementById('fbv-grid');
+
+  // Sign label
+  document.getElementById('learn-sign-label').textContent = sign.label;
+
+  // Load demo clip as blob for instant replay
+  if (learnDemoBlobUrl) { URL.revokeObjectURL(learnDemoBlobUrl); learnDemoBlobUrl = null; }
+  try {
+    const blob = await fetch(API + sign.clipUrl).then(r => r.blob());
+    learnDemoBlobUrl = URL.createObjectURL(blob);
+    const vid = document.getElementById('learn-demo-vid');
+    vid.pause();
+    vid.removeAttribute('src');
+    vid.load();
+    vid.src = learnDemoBlobUrl;
+    vid.loop = true;
+    vid.currentTime = 0;
+    vid.play().catch(() => {});
+  } catch(e) {
+    setStatus('learn-status', '⚠️ Could not load demo clip: ' + e.message);
+  }
+
+  _learnUpdateAttempts();
+  setStatus('learn-status', 'Watch the clip, then press Start to record your attempt.');
+  document.getElementById('learn-start-btn').disabled = false;
+  document.getElementById('learn-stop-btn').disabled = true;
+}
+
+function learnReplayDemo() {
+  const vid = document.getElementById('learn-demo-vid');
+  vid.currentTime = 0;
+  vid.play().catch(() => {});
+}
+
+function _learnUpdateAttempts() {
+  const el = document.getElementById('learn-attempts');
+  if (learnAttempts === 0) { el.textContent = ''; return; }
+  el.textContent = 'Attempt ' + learnAttempts + (learnAttempts === 1 ? ' — keep trying!' : ' — you got this!');
+}
+
+async function learnStartRec() {
+  learnBuf = [];
+  document.getElementById('learn-start-btn').disabled = true;
+  document.getElementById('learn-stop-btn').disabled = false;
+  _learnHideResult();
+
+  try {
+    learnStream = await navigator.mediaDevices.getUserMedia({video:{width:{ideal:640},height:{ideal:480},frameRate:{ideal:15}},audio:false});
+  } catch(e) {
+    document.getElementById('learn-start-btn').disabled = false;
+    document.getElementById('learn-stop-btn').disabled = true;
+    setStatus('learn-status', '❌ Camera needed: ' + permErr(e, true));
+    return;
+  }
+
+  document.getElementById('learn-cam-vid').srcObject = learnStream;
+  document.getElementById('learn-rec-pill').classList.add('on');
+  learnRec = new MediaRecorder(learnStream, {mimeType: getMime(true), videoBitsPerSecond: 500000});
+  learnRec.ondataavailable = e => { if (e.data && e.data.size > 0) learnBuf.push(e.data); };
+  learnRec.start(100);
+  setStatus('learn-status', '🔴 Recording — hold the sign clearly for 2–3 seconds.');
+}
+
+async function learnStopRec() {
+  document.getElementById('learn-stop-btn').disabled = true;
+  setStatus('learn-status', '⏳ Analysing your sign…');
+
+  await safeStop(learnRec);
+  stopStream(learnStream); learnStream = null;
+  document.getElementById('learn-cam-vid').srcObject = null;
+  document.getElementById('learn-rec-pill').classList.remove('on');
+
+  if (!learnBuf.length) {
+    setStatus('learn-status', '⚠️ Nothing recorded. Press Start and try again.');
+    document.getElementById('learn-start-btn').disabled = false;
+    return;
+  }
+
+  const blob = new Blob(learnBuf, {type: learnBuf[0].type});
+  learnBuf = [];
+  learnAttempts++;
+  _learnUpdateAttempts();
+
+  try {
+    const data = await apiFetch('/sign-to-text', {
+      method: 'POST',
+      body: blob,
+      headers: {'Content-Type': 'application/octet-stream'}
+    });
+
+    const target   = learnQueue[learnQueueIdx].label.toLowerCase();
+    const got      = (data.text || '').toLowerCase();
+    const conf     = data.confidence || 0;
+    const sid      = data.session_id || null;
+    const passed   = got === target && conf >= LEARN_PASS_THRESHOLD;
+
+    _learnShowResult(passed, got, conf, target);
+
+    // Always send feedback so the model learns from every attempt
+    if (sid) {
+      const feedbackBody = passed
+        ? {session_id: sid, correct: true}
+        : {session_id: sid, correct: false, label: target};
+      fetch('/feedback', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(feedbackBody)
+      }).catch(() => {}); // fire-and-forget, don't block the UI
+    }
+
+    if (passed) {
+      learnStreak++;
+      setTimeout(async () => {
+        _learnHideResult();
+        learnQueueIdx++;
+        if (learnQueueIdx >= learnQueue.length) {
+          learnShowComplete();
+        } else {
+          await learnShowCurrentSign();
+        }
+      }, 2200);
+    } else {
+      // Failed — replay demo then let user try again
+      setTimeout(() => {
+        _learnHideResult();
+        learnReplayDemo();
+        document.getElementById('learn-start-btn').disabled = false;
+        setStatus('learn-status', 'Watch the clip again, then press Start for another attempt.');
+      }, 2500);
+    }
+
+  } catch(err) {
+    learnStreak = 0;
+    const notTrained = err.message && (err.message.includes('503') || err.message.includes('not_trained'));
+    if (notTrained) {
+      setStatus('learn-status', '⚠️ Model not trained yet — go to Dev Panel to train first.');
+    } else {
+      // Likely no hand detected (422) or server error — count as a miss and retry
+      _learnShowResult(false, null, 0, learnQueue[learnQueueIdx].label);
+      setTimeout(() => {
+        _learnHideResult();
+        learnReplayDemo();
+        document.getElementById('learn-start-btn').disabled = false;
+        setStatus('learn-status', 'Make sure your hand is clearly visible. Try again.');
+      }, 2500);
+    }
+  }
+}
+function _learnShowResult(passed, got, conf, target) {
+  const overlay = document.getElementById('learn-result-overlay');
+  const pct     = Math.round(conf * 100);
+
+  document.getElementById('learn-result-emoji').textContent  = passed ? '✅' : '❌';
+  document.getElementById('learn-result-label').textContent  = passed
+    ? 'Correct! ' + pct + '%'
+    : got ? 'Detected: "' + got + '" (' + pct + '%)' : 'Not detected';
+  document.getElementById('learn-result-conf').textContent   = passed
+    ? 'Moving to next sign…'
+    : 'Need ' + Math.round(LEARN_PASS_THRESHOLD * 100) + '% for "' + target + '"';
+
+  const bar   = document.getElementById('learn-conf-bar');
+  bar.style.width      = pct + '%';
+  bar.style.background = passed ? '#4ade80' : conf > 0.6 ? '#ffb83f' : '#ff7aaa';
+
+  setStatus('learn-status', passed
+    ? '🎉 Great job! ' + pct + '% confidence — passing!'
+    : 'Keep practising — got ' + pct + '%, need ' + Math.round(LEARN_PASS_THRESHOLD * 100) + '%');
+
+  overlay.classList.add('show');
+}
+
+function _learnHideResult() {
+  document.getElementById('learn-result-overlay').classList.remove('show');
+}
+
+function learnSkip() {
+  learnStreak = 0;
+  stopStream(learnStream); learnStream = null;
+  learnBuf = [];
+  _learnHideResult();
+  learnQueueIdx++;
+  if (learnQueueIdx >= learnQueue.length) {
+    learnShowComplete();
+  } else {
+    learnShowCurrentSign();
+  }
+}
+
+function learnBack() {
+  stopStream(learnStream); learnStream = null;
+  learnBuf = [];
+  if (learnDemoBlobUrl) { URL.revokeObjectURL(learnDemoBlobUrl); learnDemoBlobUrl = null; }
+  nav('home');
+}
+
+function learnShowComplete() {
+  stopStream(learnStream); learnStream = null;
+  if (learnDemoBlobUrl) { URL.revokeObjectURL(learnDemoBlobUrl); learnDemoBlobUrl = null; }
+  document.getElementById('learn-pick').style.display = 'none';
+  document.getElementById('learn-practise').style.display = 'none';
+  document.getElementById('learn-complete').style.display = '';
+  const passed = learnQueue.filter((_, i) => i < learnQueueIdx).length;
+  document.getElementById('learn-complete-msg').textContent =
+    'You practised ' + learnQueue.length + ' sign' + (learnQueue.length !== 1 ? 's' : '') +
+    (learnStreak > 1 ? ' with a streak of ' + learnStreak + '! 🔥' : '.');
+}
+
+function learnRestart() {
+  learnStreak = 0;
+  learnQueueIdx = 0;
+  learnInit();
+}
+
+// learnInit() is called directly from nav() when id === 'learn'
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// AI FEEDBACK — standalone camera → AI guess → confirm/correct → train
+// ═══════════════════════════════════════════════════════════════════════════════
+let fbStream = null, fbRec = null, fbBuf = [], fbBlob = null;
+let fbSessionId = null, fbPredicted = '', fbConf = 0, fbLabels = [];
+
+function _fbScreens(record, result, done) {
+  document.getElementById('fb-record-screen').style.display  = record ? '' : 'none';
+  document.getElementById('fb-result-screen').style.display  = result ? '' : 'none';
+  document.getElementById('fb-done-screen').style.display    = done   ? '' : 'none';
+}
+
+async function fbStart() {
+  fbBuf = [];
+  document.getElementById('fb-start-btn').disabled = true;
+  document.getElementById('fb-stop-btn').disabled  = false;
+  setStatus('fb-status', '🔴 Recording — hold the sign clearly for 2–3 seconds.');
+  try {
+    fbStream = await navigator.mediaDevices.getUserMedia({
+      video: {width:{ideal:640}, height:{ideal:480}, frameRate:{ideal:15}},
+      audio: false
+    });
+  } catch(e) {
+    document.getElementById('fb-start-btn').disabled = false;
+    document.getElementById('fb-stop-btn').disabled  = true;
+    setStatus('fb-status', '❌ ' + permErr(e, true));
+    return;
+  }
+  document.getElementById('fb-vid').srcObject = fbStream;
+  document.getElementById('fb-rec-pill').classList.add('on');
+  fbRec = new MediaRecorder(fbStream, {mimeType: getMime(true), videoBitsPerSecond: 500000});
+  fbRec.ondataavailable = e => { if (e.data && e.data.size > 0) fbBuf.push(e.data); };
+  fbRec.start(100);
+}
+
+async function fbStop() {
+  document.getElementById('fb-stop-btn').disabled = true;
+  setStatus('fb-status', '⏳ Analysing…');
+  await safeStop(fbRec);
+  stopStream(fbStream); fbStream = null;
+  document.getElementById('fb-vid').srcObject = null;
+  document.getElementById('fb-rec-pill').classList.remove('on');
+  document.getElementById('fb-start-btn').disabled = false;
+
+  if (!fbBuf.length) {
+    setStatus('fb-status', '⚠️ Nothing recorded. Press Start and try again.');
+    return;
+  }
+
+  // Keep the blob — we need it if we fall back to /collect-video
+  fbBlob = new Blob(fbBuf, {type: fbBuf[0].type}); fbBuf = [];
+  fbSessionId = null; fbPredicted = ''; fbConf = 0;
+
+  // Always pre-load labels so the correction grid is ready
+  if (!fbLabels.length) {
+    try {
+      const h = await fetch('/health').then(r => r.json());
+      fbLabels = (h.model_labels || []).sort();
+    } catch(_) {}
+  }
+
+  // Try to get an AI guess — but ALWAYS show the result screen regardless
+  try {
+    const data = await apiFetch('/sign-to-text', {
+      method: 'POST', body: fbBlob,
+      headers: {'Content-Type': 'application/octet-stream'}
+    });
+    fbSessionId = data.session_id || null;
+    fbPredicted = data.text || '';
+    fbConf      = data.confidence || 0;
+  } catch(_) {
+    // Model not trained, nothing recognised, or server error — that's fine,
+    // we'll still let the user pick a label and store via /collect-video
+  }
+
+  // Show result screen — with or without a recognised sign
+  document.getElementById('fb-pred-word').textContent = fbPredicted || '(not recognised)';
+  document.getElementById('fb-pred-conf').textContent = fbConf ? Math.round(fbConf*100) + '% confidence' : 'No sign detected — pick a label below to train';
+  document.getElementById('fb-yn-area').style.display = fbPredicted ? '' : 'none';
+  document.getElementById('fb-correction-area').style.display = fbPredicted ? 'none' : '';
+  _fbScreens(false, true, false);
+
+  // If nothing recognised, pre-populate the correction grid immediately
+  if (!fbPredicted) _fbBuildCorrectionGrid();
+}
+
+async function fbConfirmYes() {
+  _fbScreens(false, false, true);
+  document.getElementById('fb-done-icon').textContent = '✅';
+  document.getElementById('fb-done-title').textContent = '✅ Trained on "' + fbPredicted + '"';
+  document.getElementById('fb-done-note').textContent = 'Model is retraining in background';
+  document.getElementById('fb-done-note').dataset.custom = '1';
+  if (fbSessionId) {
+    // We have a session — use /feedback (most efficient, stores both I3D + MLP)
+    fetch('/feedback', {method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({session_id: fbSessionId, correct: true})
+    }).catch(()=>{});
+  } else if (fbBlob && fbPredicted) {
+    // No session but we have the raw video and a label — use /collect-video
+    fetch('/collect-video', {method:'POST',
+      headers: {'Content-Type':'application/octet-stream', 'X-Sign-Label': fbPredicted, 'X-Sign-Lang': _activeLang},
+      body: fbBlob
+    }).catch(()=>{});
+  }
+  fbSessionId = null; fbBlob = null;
+}
+
+function fbShowCorrection() {
+  document.getElementById('fb-yn-area').style.display = 'none';
+  document.getElementById('fb-correction-area').style.display = '';
+  _fbBuildCorrectionGrid();
+}
+
+function _fbBuildCorrectionGrid() {
+  const grid = document.getElementById('fb-correction-grid');
   grid.innerHTML = '';
-  (_fbLabels.length ? _fbLabels : ['(no labels)']).forEach(lbl => {
-    const b = document.createElement('button');
-    b.className = 'fb-correction-btn'; b.textContent = lbl;
-    b.onclick = () => fbViewSubmitCorrection(lbl);
-    grid.appendChild(b);
+  if (!fbLabels.length) {
+    // No model yet — show a text input so user can type a new label
+    grid.innerHTML = `
+      <div style="grid-column:1/-1;display:flex;flex-direction:column;gap:8px;">
+        <div style="font-size:13px;color:rgba(255,255,255,.55);">No trained signs yet. Type a label to create one:</div>
+        <input class="dev-input" id="fb-new-label" placeholder="e.g. blood, pain, hello…" style="font-size:15px;">
+        <button class="btn btn-violet" onclick="fbSubmitNewLabel()">💾 Save as this label</button>
+      </div>`;
+    return;
+  }
+  fbLabels.forEach(lbl => {
+    const btn = document.createElement('button');
+    btn.className = 'fb-correction-btn';
+    btn.textContent = lbl;
+    btn.onclick = () => fbSubmitCorrection(lbl);
+    grid.appendChild(btn);
+  });
+  // Also add a text input for a brand-new label not yet in the model
+  const newRow = document.createElement('div');
+  newRow.style.cssText = 'grid-column:1/-1;display:flex;gap:8px;margin-top:4px;';
+  newRow.innerHTML = `<input class="dev-input" id="fb-new-label" placeholder="New label…" style="flex:1;font-size:13px;">
+    <button class="fb-correction-btn" style="white-space:nowrap;" onclick="fbSubmitNewLabel()">+ Add</button>`;
+  grid.appendChild(newRow);
+}
+
+async function fbSubmitNewLabel() {
+  const input = document.getElementById('fb-new-label');
+  const label = (input ? input.value.trim().toLowerCase() : '');
+  if (!label) { if (input) input.focus(); return; }
+  await fbSubmitCorrection(label);
+}
+
+function fbHideCorrection() {
+  document.getElementById('fb-correction-area').style.display = 'none';
+  document.getElementById('fb-yn-area').style.display = '';
+}
+
+async function fbSubmitCorrection(correctLabel) {
+  _fbScreens(false, false, true);
+  document.getElementById('fb-done-icon').textContent = '✅';
+  document.getElementById('fb-done-title').textContent = '✅ Saved as "' + correctLabel + '"';
+  document.getElementById('fb-done-note').textContent = 'The AI will be better next time';
+  document.getElementById('fb-done-note').dataset.custom = '1';
+
+  if (fbSessionId) {
+    // Has a session (AI made a guess) — use /feedback for best data quality
+    fetch('/feedback', {method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({session_id: fbSessionId, correct: false, label: correctLabel})
+    }).catch(()=>{});
+  }
+  // Always also send raw video via /collect-video so data is stored
+  // even when there was no session (model not trained, nothing recognised, new label)
+  if (fbBlob) {
+    fetch('/collect-video', {method:'POST',
+      headers: {'Content-Type':'application/octet-stream', 'X-Sign-Label': correctLabel, 'X-Sign-Lang': _activeLang},
+      body: fbBlob
+    }).catch(()=>{});
+  }
+  fbSessionId = null; fbBlob = null;
+}
+
+function fbRecordAgain() {
+  stopStream(fbStream); fbStream = null; fbBuf = []; fbBlob = null;
+  fbSessionId = null; fbPredicted = ''; fbConf = 0;
+  document.getElementById('fb-done-note').dataset.custom = '';
+  document.getElementById('fb-start-btn').disabled = false;
+  document.getElementById('fb-stop-btn').disabled  = true;
+  setStatus('fb-status', 'Press Start to record your sign.');
+  _fbScreens(true, false, false);
+}
+
+// Feedback init is triggered from nav() directly (see nav function above)
+
+</script>
+
+<!-- LANG PICKER OVERLAY -->
+<div class="lang-picker-overlay" id="lang-picker-overlay" onclick="closeLangPickerIfBg(event)">
+  <div id="lang-picker">
+    <div class="lang-picker-title">Choose Sign Language</div>
+    <div class="lang-picker-sub">All tools will switch to your selected language</div>
+    <div class="lang-picker-grid">
+      <div class="lang-picker-option" id="lpo-asl" onclick="setLang('asl')">
+        <span class="lang-picker-flag">🇺🇸</span>
+        <div class="lang-picker-info">
+          <div class="lang-picker-name">ASL — American Sign Language</div>
+          <div class="lang-picker-desc">Used in the United States &amp; Canada</div>
+        </div>
+        <span class="lang-picker-check" id="lpc-asl"></span>
+      </div>
+      <div class="lang-picker-option" id="lpo-lse" onclick="setLang('lse')">
+        <span class="lang-picker-flag">🇪🇸</span>
+        <div class="lang-picker-info">
+          <div class="lang-picker-name">LSE — Lengua de Signos Española</div>
+          <div class="lang-picker-desc">Used in Spain</div>
+        </div>
+        <span class="lang-picker-check" id="lpc-lse"></span>
+      </div>
+    </div>
+    <button class="lang-picker-cancel" onclick="closeLangPicker()">Cancel</button>
+  </div>
+</div>
+
+<script>
+/* ═══════════════ THEME ═══════════════ */
+(function(){
+  const saved = localStorage.getItem('sf_theme') || 'dark';
+  if(saved === 'light') document.body.classList.add('light');
+  _updateThemeBtn();
+})();
+
+function toggleTheme(){
+  const isLight = document.body.classList.toggle('light');
+  localStorage.setItem('sf_theme', isLight ? 'light' : 'dark');
+  _updateThemeBtn();
+}
+
+function _updateThemeBtn(){
+  const btn = document.getElementById('theme-toggle-btn');
+  if(!btn) return;
+  btn.textContent = document.body.classList.contains('light') ? '☀️' : '🌙';
+}
+
+/* ═══════════════ LANGUAGE PICKER ═══════════════ */
+function openLangPicker(){
+  document.getElementById('lang-picker-overlay').classList.add('show');
+  _updateLangPickerUI();
+}
+function closeLangPicker(){
+  document.getElementById('lang-picker-overlay').classList.remove('show');
+}
+function closeLangPickerIfBg(e){
+  if(e.target === document.getElementById('lang-picker-overlay')) closeLangPicker();
+}
+function _updateLangPickerUI(){
+  const lang = typeof _activeLang !== 'undefined' ? _activeLang : (localStorage.getItem('sf_lang') || 'asl');
+  ['asl','lse'].forEach(l => {
+    const opt = document.getElementById('lpo-'+l);
+    const chk = document.getElementById('lpc-'+l);
+    if(!opt) return;
+    opt.classList.remove('active-asl','active-lse');
+    chk.textContent = '';
+    if(l === lang){ opt.classList.add('active-'+l); chk.textContent = '✅'; }
   });
 }
 
-function fbViewHideCorrection() {
-  document.getElementById('fbv-correction').style.display = 'none';
-  document.getElementById('fbv-yn').style.display        = '';
-}
-
-async function fbViewSubmitCorrection(correctLabel) {
-  if (!_fbSessionId) return;
-  document.getElementById('fbv-correction').style.display = 'none';
-  document.getElementById('fbv-done').style.display       = '';
-  document.getElementById('fbv-done-msg').textContent  = '⏳ Saving 10× as "' + correctLabel + '"…';
-  document.getElementById('fbv-done-note').textContent = 'Heavy correction — retraining in background';
-  try {
-    await fetch('/feedback', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({session_id:_fbSessionId,correct:false,label:correctLabel})});
-    document.getElementById('fbv-done-msg').textContent  = '✅ Saved 10× as "' + correctLabel + '"';
-    document.getElementById('fbv-done-note').textContent = 'The AI will be better next time';
-    const o = document.getElementById('s2t-out'); if(o){o.textContent=correctLabel;o.classList.remove('ph');}
-    setStatus('s2t-status','✅ Corrected to: "'+correctLabel+'"');
-  } catch(e) {
-    document.getElementById('fbv-done-msg').textContent = '⚠️ ' + e.message;
+function setLang(lang){
+  // Call the existing switchLang function if it exists, otherwise set directly
+  if(typeof switchLang === 'function'){
+    closeLangPicker();
+    switchLang(lang);
+  } else {
+    if(typeof _activeLang !== 'undefined') _activeLang = lang;
+    localStorage.setItem('sf_lang', lang);
+    _updateLangPickerUI();
+    closeLangPicker();
+    applyTranslations(lang);
   }
-  fbBtnHide(); _fbSessionId = null;
 }
 
+/* ═══════════════ TRANSLATIONS ═══════════════ */
+const TRANSLATIONS = {
+  asl: {
+    hero_sub: 'Choose a translation mode to get started.',
+    card_s2a_title: 'Sign → Audio',
+    card_s2a_desc: 'Record signing, receive spoken audio',
+    card_a2s_title: 'Audio → Sign',
+    card_a2s_desc: 'Speak into mic, see sign language video',
+    card_t2s_title: 'Text → Sign',
+    card_t2s_desc: 'Type a message, watch it get signed',
+    card_s2t_title: 'Sign → Text',
+    card_s2t_desc: 'Sign on camera, receive a transcription',
+    card_learn_title: 'Learn Sign Language',
+    card_learn_desc: 'Practise signs with AI feedback',
+    card_fb_title: 'AI Feedback',
+    card_fb_desc: 'Record a sign — AI guesses, you train it',
+    settings_sub: 'Language · Font size · Volume · Mic test',
+    eyebrow: 'Real-time translation',
+    lang_badge: '🇺🇸 ASL',
+  },
+  lse: {
+    hero_sub: 'Elige un modo de traducción para comenzar.',
+    card_s2a_title: 'Seña → Audio',
+    card_s2a_desc: 'Graba tu lengua de signos, recibe audio',
+    card_a2s_title: 'Audio → Seña',
+    card_a2s_desc: 'Habla por el micrófono, ve el vídeo de LSE',
+    card_t2s_title: 'Texto → Seña',
+    card_t2s_desc: 'Escribe un mensaje, míralo en signos',
+    card_s2t_title: 'Seña → Texto',
+    card_s2t_desc: 'Firma ante la cámara, recibe transcripción',
+    card_learn_title: 'Aprende Lengua de Signos',
+    card_learn_desc: 'Practica signos con retroalimentación IA',
+    card_fb_title: 'Retroalimentación IA',
+    card_fb_desc: 'Graba un signo — la IA adivina, tú la entrenas',
+    settings_sub: 'Idioma · Tamaño · Volumen · Test de micro',
+    eyebrow: 'Traducción en tiempo real',
+    lang_badge: '🇪🇸 LSE',
+  }
+};
+
+function applyTranslations(lang){
+  const t = TRANSLATIONS[lang] || TRANSLATIONS['asl'];
+  const set = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
+  const setTxt = (sel, val) => { const el = document.querySelector(sel); if(el) el.textContent = val; };
+
+  // Hero
+  setTxt('.hero-sub', t.hero_sub);
+  setTxt('.hero-eyebrow .eyebrow-dot + *', null); // handled below
+  const eyebrow = document.querySelector('.hero-eyebrow');
+  if(eyebrow){
+    const dot = eyebrow.querySelector('.eyebrow-dot');
+    eyebrow.textContent = ' ' + t.eyebrow;
+    if(dot){ eyebrow.prepend(dot); }
+  }
+
+  // Lang badge in topbar (if present)
+  const langBadgeBtn = document.getElementById('lang-picker-btn');
+  if(langBadgeBtn) langBadgeBtn.setAttribute('title', t.lang_badge);
+
+  // Update lang picker active state
+  _updateLangPickerUI();
+}
+
+// Apply on load
+(function(){
+  const lang = localStorage.getItem('sf_lang') || 'asl';
+  // Defer so the rest of the page JS can initialise first
+  setTimeout(() => applyTranslations(lang), 80);
+})();
 </script>
 </body>
 </html>
